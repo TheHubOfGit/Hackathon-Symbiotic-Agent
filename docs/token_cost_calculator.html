@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hackathon Agent Token Cost Calculator</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #1e293b;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+        .calculator-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        .input-section {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 12px;
+            border: 2px solid #e2e8f0;
+        }
+        .results-section {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #374151;
+        }
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 16px;
+            margin-bottom: 16px;
+            transition: border-color 0.3s;
+            box-sizing: border-box;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+        .agent-breakdown {
+            margin-top: 20px;
+        }
+        .agent-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+        .agent-name {
+            font-weight: 600;
+        }
+        .agent-cost {
+            font-family: 'SF Mono', monospace;
+            font-weight: 700;
+        }
+        .total-section {
+            background: rgba(255,255,255,0.2);
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            text-align: center;
+        }
+        .optimization-section {
+            grid-column: 1 / -1;
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        .optimization-toggle {
+            margin: 10px;
+            padding: 8px 16px;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            border-radius: 20px;
+            color: white;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .optimization-toggle.active {
+            background: rgba(255,255,255,0.4);
+        }
+        .cost-comparison {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .cost-card {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .cost-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .cost-label {
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+        .super-analysis {
+            margin-top: 20px;
+            padding: 15px;
+            background: linear-gradient(135deg, #7C3AED, #EC4899);
+            border-radius: 8px;
+            color: white;
+        }
+        .super-analysis h4 {
+            margin: 0 0 10px 0;
+        }
+        .super-analysis input[type="checkbox"] {
+            margin-right: 8px;
+            width: auto;
+        }
+        .super-analysis label {
+            color: white;
+            font-weight: normal;
+            display: inline;
+        }
+        .voting-status {
+            font-size: 10px;
+            margin-top: 5px;
+            opacity: 0.8;
+        }
+        .scanner-info {
+            background: #f1f5f9;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 20px;
+        }
+        .scanner-allocation {
+            margin-top: 10px;
+            padding: 10px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 5px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 Hackathon Agent Cost Calculator</h1>
+        
+        <div class="calculator-grid">
+            <div class="input-section">
+                <h3>Event Parameters</h3>
+                
+                <label for="participants">Number of Participants:</label>
+                <input type="number" id="participants" value="5" min="1" max="50">
+                
+                <label for="duration">Hackathon Duration (hours):</label>
+                <input type="number" id="duration" value="8" min="1" max="48">
+                
+                <label for="activity">Activity Level:</label>
+                <select id="activity">
+                    <option value="low">Low (Basic coordination)</option>
+                    <option value="medium" selected>Medium (Active development)</option>
+                    <option value="high">High (Intensive collaboration)</option>
+                </select>
+                
+                <label for="repoSize">Repository Size:</label>
+                <select id="repoSize">
+                    <option value="small">Small (&lt;10k LOC)</option>
+                    <option value="medium" selected>Medium (10k-50k LOC)</option>
+                    <option value="large">Large (50k+ LOC)</option>
+                </select>
+                
+                <div class="super-analysis">
+                    <h4>🚀 Super Analysis Sessions</h4>
+                    <div style="font-size: 11px; margin-bottom: 10px;">Limited premium sessions • Requires team voting</div>
+                    <input type="checkbox" id="superAnalysis">
+                    <label for="superAnalysis">Enable Premium AI Sessions</label>
+                    <div style="font-size: 10px; margin-top: 5px; opacity: 0.9;">Grok 4 + Claude Optimus 4.1 + ChatGPT 5</div>
+                    <div id="votingStatus" class="voting-status"></div>
+                </div>
+            </div>
+            
+            <div class="results-section">
+                <h3>💰 Cost Breakdown</h3>
+                <div id="agentBreakdown" class="agent-breakdown">
+                    <!-- Populated by JavaScript -->
+                </div>
+                <div class="total-section">
+                    <div style="font-size: 1.2em; margin-bottom: 10px;">Total Cost</div>
+                    <div id="totalCost" style="font-size: 2em; font-weight: bold;">$0.00</div>
+                    <div id="perPersonCost" style="font-size: 1em; opacity: 0.8; margin-top: 5px;">$0.00 per person</div>
+                </div>
+                <div id="scannerAllocation" class="scanner-allocation">
+                    <!-- Populated by JavaScript -->
+                </div>
+            </div>
+            
+            <div class="optimization-section">
+                <h3>⚡ Efficiency Optimizations</h3>
+                <p>Enable optimizations to see cost reductions:</p>
+                <div>
+                    <button class="optimization-toggle" data-optimization="caching">Smart Caching (-30%)</button>
+                    <button class="optimization-toggle" data-optimization="incremental">Incremental Updates (-25%)</button>
+                    <button class="optimization-toggle" data-optimization="targeted">Targeted Analysis (-20%)</button>
+                    <button class="optimization-toggle" data-optimization="structured">Structured Pre-processing (-15%)</button>
+                </div>
+                
+                <div class="cost-comparison">
+                    <div class="cost-card">
+                        <div id="originalCost" class="cost-value">$0.00</div>
+                        <div class="cost-label">Original Cost</div>
+                    </div>
+                    <div class="cost-card">
+                        <div id="optimizedCost" class="cost-value">$0.00</div>
+                        <div class="cost-label">Optimized Cost</div>
+                    </div>
+                    <div class="cost-card">
+                        <div id="savings" class="cost-value">0%</div>
+                        <div class="cost-label">Total Savings</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="scanner-info">
+            <h3>📊 Dynamic Scanner Allocation</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-top: 15px;">
+                <div>
+                    <strong>Base Scanner:</strong><br>
+                    Always active for continuous monitoring
+                </div>
+                <div>
+                    <strong>Activity-Based Scaling:</strong><br>
+                    Low: +0, Medium: +1, High: +2 scanners
+                </div>
+                <div>
+                    <strong>Repository Size Scaling:</strong><br>
+                    Small: +0, Medium: +1, Large: +2 scanners
+                </div>
+                <div>
+                    <strong>Team Size Scaling:</strong><br>
+                    5+ people: +1, 8+ people: +1 scanner
+                </div>
+            </div>
+            <p style="margin-top: 15px; font-size: 12px; color: #64748B;">
+                O4-Mini dynamically allocates 1-8 Gemini 1.5 Pro scanners based on project complexity, 
+                team conflicts, and analysis needs. More complex scenarios automatically scale scanner usage.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // State management
+        const state = {
+            optimizations: {
+                caching: false,
+                incremental: false,
+                targeted: false,
+                structured: false
+            },
+            agents: {
+                'Gemini 2.5 Pro (Roadmap)': { 
+                    baseTokens: 5000, 
+                    scalingFactor: 0.3,
+                    pricePerMillion: 2.5
+                },
+                'Gemini 1.5 Pro Crew': { 
+                    baseTokens: 10000,
+                    scalingFactor: 0.8, 
+                    pricePerMillion: 1.25,
+                    isDynamic: true
+                },
+                'Gemini 2.5 Flash (per user)': { 
+                    baseTokens: 5000, 
+                    scalingFactor: 1.0, 
+                    pricePerMillion: 0.5
+                },
+                'Claude 4.0 Sonnet': { 
+                    baseTokens: 15000, 
+                    scalingFactor: 0.6, 
+                    pricePerMillion: 18
+                },
+                'O4-Mini': { 
+                    baseTokens: 8000, 
+                    scalingFactor: 0.4, 
+                    pricePerMillion: 7.5
+                },
+                'GPT-5 Nano': { 
+                    baseTokens: 20000, 
+                    scalingFactor: 0.7, 
+                    pricePerMillion: 0.225
+                }
+            }
+        };
+
+        // Utility functions
+        function getElement(id) {
+            return document.getElementById(id);
+        }
+
+        function getInputValue(id, defaultValue = 0) {
+            const element = getElement(id);
+            return element ? (element.type === 'checkbox' ? element.checked : element.value) : defaultValue;
+        }
+
+        function setElementText(id, text) {
+            const element = getElement(id);
+            if (element) element.textContent = text;
+        }
+
+        function calculateScannerCount(participants, activity, repoSize) {
+            let scanners = 1; // Base scanner
+            
+            // Activity scaling
+            const activityBonus = { low: 0, medium: 1, high: 2 };
+            scanners += activityBonus[activity] || 0;
+            
+            // Repository size scaling
+            const repoBonus = { small: 0, medium: 1, large: 2 };
+            scanners += repoBonus[repoSize] || 0;
+            
+            // Team size scaling
+            if (participants >= 5) scanners += 1;
+            if (participants >= 8) scanners += 1;
+            
+            return Math.min(scanners, 8);
+        }
+
+        function calculateSuperAnalysisCost(activity) {
+            const baseSessions = 3;
+            const activityMultipliers = { low: 1, medium: 1.5, high: 2 };
+            const sessions = Math.floor(baseSessions * (activityMultipliers[activity] || 1));
+            return sessions * 3.5; // $3.50 per session
+        }
+
+        function calculateCosts() {
+            try {
+                // Get input values
+                const participants = parseInt(getInputValue('participants', 5));
+                const duration = parseInt(getInputValue('duration', 8));
+                const activity = getInputValue('activity', 'medium');
+                const repoSize = getInputValue('repoSize', 'medium');
+                const enableSuper = getInputValue('superAnalysis', false);
+
+                // Activity and repo multipliers
+                const activityMult = { low: 0.7, medium: 1.0, high: 1.4 }[activity] || 1.0;
+                const repoMult = { small: 0.8, medium: 1.0, large: 1.3 }[repoSize] || 1.0;
+
+                let totalCost = 0;
+                const breakdown = {};
+
+                // Calculate costs for each agent
+                for (const [agentName, config] of Object.entries(state.agents)) {
+                    let tokens = config.baseTokens;
+                    let displayName = agentName;
+
+                    // Handle dynamic scanner allocation
+                    if (config.isDynamic) {
+                        const scannerCount = calculateScannerCount(participants, activity, repoSize);
+                        tokens *= scannerCount;
+                        displayName = `${agentName} (${scannerCount}x)`;
+                    }
+
+                    // Apply scaling
+                    if (agentName.includes('per user')) {
+                        tokens *= participants;
+                    } else {
+                        tokens *= Math.pow(participants, config.scalingFactor);
+                    }
+
+                    // Apply multipliers and duration
+                    tokens *= activityMult * repoMult * duration;
+
+                    // Calculate cost
+                    const cost = (tokens / 1000000) * config.pricePerMillion;
+                    breakdown[displayName] = { cost, tokens };
+                    totalCost += cost;
+                }
+
+                // Add super analysis cost
+                let superCost = 0;
+                if (enableSuper) {
+                    superCost = calculateSuperAnalysisCost(activity);
+                    const sessions = Math.floor(3 * ({ low: 1, medium: 1.5, high: 2 }[activity] || 1));
+                    breakdown[`🚀 Super Analysis (${sessions} sessions)`] = { cost: superCost, tokens: 0 };
+                    totalCost += superCost;
+                }
+
+                // Apply optimizations
+                let optimizedCost = totalCost;
+                let totalReduction = 0;
+                
+                if (state.optimizations.caching) totalReduction += 0.3;
+                if (state.optimizations.incremental) totalReduction += 0.25;
+                if (state.optimizations.targeted) totalReduction += 0.2;
+                if (state.optimizations.structured) totalReduction += 0.15;
+                
+                totalReduction = Math.min(totalReduction, 0.7); // Cap at 70%
+                optimizedCost = totalCost * (1 - totalReduction);
+
+                // Update display
+                updateDisplay(breakdown, totalCost, optimizedCost, participants, totalReduction * 100);
+
+            } catch (error) {
+                console.error('Calculation error:', error);
+                const container = getElement('agentBreakdown');
+                if (container) {
+                    container.innerHTML = '<div style="color: #ff6b6b; padding: 10px;">Calculation error. Please check your inputs.</div>';
+                }
+            }
+        }
+
+        function updateDisplay(breakdown, originalCost, optimizedCost, participants, reductionPercent) {
+            // Update breakdown
+            const container = getElement('agentBreakdown');
+            if (container) {
+                container.innerHTML = '';
+                
+                for (const [agentName, data] of Object.entries(breakdown)) {
+                    const item = document.createElement('div');
+                    item.className = 'agent-item';
+                    item.innerHTML = `
+                        <div class="agent-name">${agentName}</div>
+                        <div class="agent-cost">$${data.cost.toFixed(2)}</div>
+                    `;
+                    container.appendChild(item);
+                }
+            }
+
+            // Update totals
+            setElementText('totalCost', `$${optimizedCost.toFixed(2)}`);
+            setElementText('perPersonCost', `$${(optimizedCost / participants).toFixed(2)} per person`);
+
+            // Update comparison
+            setElementText('originalCost', `$${originalCost.toFixed(2)}`);
+            setElementText('optimizedCost', `$${optimizedCost.toFixed(2)}`);
+            setElementText('savings', `${reductionPercent.toFixed(1)}%`);
+
+            // Update scanner allocation
+            updateScannerAllocation();
+        }
+
+        function updateScannerAllocation() {
+            const participants = parseInt(getInputValue('participants', 5));
+            const activity = getInputValue('activity', 'medium');
+            const repoSize = getInputValue('repoSize', 'medium');
+            const scannerCount = calculateScannerCount(participants, activity, repoSize);
+
+            const container = getElement('scannerAllocation');
+            if (container) {
+                const activityBonus = { low: 0, medium: 1, high: 2 }[activity] || 0;
+                const repoBonus = { small: 0, medium: 1, large: 2 }[repoSize] || 0;
+                const teamBonus = participants >= 8 ? 2 : participants >= 5 ? 1 : 0;
+
+                container.innerHTML = `
+                    <strong>Current Scanner Allocation: ${scannerCount} Gemini 1.5 Pro instances</strong><br>
+                    <span style="opacity: 0.8;">
+                        Base(1) + Activity(${activityBonus}) + Repo(${repoBonus}) + Team(${teamBonus}) = ${scannerCount}
+                    </span>
+                `;
+            }
+        }
+
+        function updateVotingStatus() {
+            const participants = parseInt(getInputValue('participants', 5));
+            const activity = getInputValue('activity', 'medium');
+            const enableSuper = getInputValue('superAnalysis', false);
+
+            const sessions = Math.floor(3 * ({ low: 1, medium: 1.5, high: 2 }[activity] || 1));
+            const requiredVotes = participants < 3 ? 2 : Math.ceil(participants / 2);
+            const totalCost = sessions * 3.5;
+
+            const statusEl = getElement('votingStatus');
+            if (statusEl) {
+                if (enableSuper) {
+                    statusEl.textContent = `✓ Approved: ${sessions} premium sessions (~$${totalCost.toFixed(0)} total)`;
+                    statusEl.style.color = '#10B981';
+                } else {
+                    statusEl.textContent = `${sessions} sessions available • Requires ${requiredVotes} votes • ~$${totalCost.toFixed(0)} total`;
+                    statusEl.style.color = '#F87171';
+                }
+            }
+        }
+
+        // Event listeners
+        function initializeEventListeners() {
+            // Input changes
+            ['participants', 'duration', 'activity', 'repoSize'].forEach(id => {
+                const element = getElement(id);
+                if (element) {
+                    element.addEventListener('input', () => {
+                        updateVotingStatus();
+                        calculateCosts();
+                    });
+                    element.addEventListener('change', () => {
+                        updateVotingStatus();
+                        calculateCosts();
+                    });
+                }
+            });
+
+            // Super analysis checkbox
+            const superEl = getElement('superAnalysis');
+            if (superEl) {
+                superEl.addEventListener('change', () => {
+                    updateVotingStatus();
+                    calculateCosts();
+                });
+            }
+
+            // Optimization toggles
+            document.querySelectorAll('.optimization-toggle').forEach(button => {
+                button.addEventListener('click', () => {
+                    const optimization = button.dataset.optimization;
+                    state.optimizations[optimization] = !state.optimizations[optimization];
+                    button.classList.toggle('active');
+                    calculateCosts();
+                });
+            });
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeEventListeners();
+            updateVotingStatus();
+            calculateCosts();
+        });
+    </script>
+</body>
+</html>
