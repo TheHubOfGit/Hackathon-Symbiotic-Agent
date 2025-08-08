@@ -1,0 +1,272 @@
+<svg viewBox="0 0 1400 1050" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="userGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4F46E5;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#7C3AED;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="geminiGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#059669;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#10B981;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="claudeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#DC2626;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#EF4444;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="gptGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#7C2D12;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#EA580C;stop-opacity:1" />
+    </linearGradient>
+    <filter id="shadow">
+      <feDropShadow dx="2" dy="2" stdDeviation="3" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="1400" height="1050" fill="#F8FAFC"/>
+  
+  <!-- Title -->
+  <text x="700" y="30" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#1E293B">
+    Hackathon AI Agent Hierarchy & Data Flow
+  </text>
+  
+  <!-- Layer 1: Users -->
+  <g id="users-layer">
+    <text x="70" y="80" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#64748B">USERS</text>
+    <rect x="50" y="100" width="120" height="60" rx="8" fill="url(#userGrad)" filter="url(#shadow)"/>
+    <text x="110" y="125" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="white" font-weight="bold">User 1</text>
+    <text x="110" y="140" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="white">Skills, Tasks</text>
+    
+    <rect x="190" y="100" width="120" height="60" rx="8" fill="url(#userGrad)" filter="url(#shadow)"/>
+    <text x="250" y="125" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="white" font-weight="bold">User 2</text>
+    <text x="250" y="140" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="white">Skills, Tasks</text>
+    
+    <rect x="330" y="100" width="120" height="60" rx="8" fill="url(#userGrad)" filter="url(#shadow)"/>
+    <text x="390" y="125" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="white" font-weight="bold">User N</text>
+    <text x="390" y="140" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="white">Skills, Tasks</text>
+  </g>
+  
+  <!-- Layer 2: Roadmap Orchestrator -->
+  <g id="roadmap-layer">
+    <text x="70" y="220" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#64748B">CONTINUOUS ROADMAP ORCHESTRATION</text>
+    <rect x="150" y="240" width="200" height="80" rx="12" fill="url(#geminiGrad)" filter="url(#shadow)"/>
+    <text x="250" y="265" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="white" font-weight="bold">Gemini 2.5 Pro</text>
+    <text x="250" y="280" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="white">Roadmap Orchestrator</text>
+    <text x="250" y="295" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="white">• Handles new user registrations</text>
+    <text x="250" y="308" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="white">• Continuous roadmap updates</text>
+  </g>
+  
+  <!-- Layer 3: Repository Scanning Crew -->
+  <g id="scanning-layer">
+    <text x="70" y="380" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#64748B">DYNAMIC SCANNING CREW</text>
+    
+    <rect x="50" y="400" width="140" height="70" rx="8" fill="url(#geminiGrad)" filter="url(#shadow)"/>
+    <text x="120" y="425" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="white" font-weight="bold">Gemini 1.5 Pro</text>
+    <text x="120" y="440" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="white">Scanner #1</text>
+    <text x="120" y="453" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="white">Always Active</text>
+    <text x="120" y="463" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="white">Core Analysis</text>
+    
+    <rect x="210" y="400" width="140" height="70" rx="8" fill="url(#geminiGrad)" filter="url(#shadow)" opacity="0.8"/>
+    <text x="280" y="425" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="white" font-weight="bold">Gemini 1.5 Pro</text>
+    <text x="280" y="440" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="white">Scanner #2</text>
+    <text x="280" y="453" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="white">O4-Mini Directed</text>
+    <text x="280" y="463" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="white">Variable Usage</text>
+    
+    <rect x="370" y="400" width="140" height="70" rx="8" fill="url(#geminiGrad)" filter="url(#shadow)" opacity="0.6"/>
+    <text x="440" y="425" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="white" font-weight="bold">Gemini 1.5 Pro</text>
+    <text x="440" y="440" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="white">Scanner #N</text>
+    <text x="440" y="453" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="white">On-Demand</text>
+    <text x="440" y="463" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="white">Complex Tasks</text>
+    
+    <text x="280" y="485" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#64748B">Scanners 2-N: Dynamically allocated by O4-Mini</text>
+  </g>
+  
+  <!-- Layer 4: User-Specific Compilers -->
+  <g id="compiler-layer">
+    <text x="70" y="540" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#64748B">USER-SPECIFIC COMPILERS</text>
+    
+    <rect x="50" y="560" width="140" height="70" rx="8" fill="#8B5CF6" filter="url(#shadow)"/>
+    <text x="120" y="585" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="white" font-weight="bold">Gemini 2.5 Flash</text>
+    <text x="120" y="600" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="white">User 1 Compiler</text>
+    <text x="120" y="613" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="white">Contextual Analysis</text>
+    
+    <rect x="210" y="560" width="140" height="70" rx="8" fill="#8B5CF6" filter="url(#shadow)"/>
+    <text x="280" y="585" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="white" font-weight="bold">Gemini 2.5 Flash</text>
+    <text x="280" y="600" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="white">User 2 Compiler</text>
+    <text x="280" y="613" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="white">Contextual Analysis</text>
+    
+    <rect x="370" y="560" width="140" height="70" rx="8" fill="#8B5CF6" filter="url(#shadow)"/>
+    <text x="440" y="585" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="white" font-weight="bold">Gemini 2.5 Flash</text>
+    <text x="440" y="600" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="white">User N Compiler</text>
+    <text x="440" y="613" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="white">Contextual Analysis</text>
+  </g>
+  
+  <!-- Layer 5: Central Coordinator -->
+  <g id="coordinator-layer">
+    <text x="650" y="220" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#64748B">CENTRAL COORDINATOR</text>
+    <rect x="620" y="240" width="220" height="100" rx="12" fill="url(#claudeGrad)" filter="url(#shadow)"/>
+    <text x="730" y="270" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" fill="white" font-weight="bold">Claude 4.0 Sonnet</text>
+    <text x="730" y="290" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="white">Progress Map Coordinator</text>
+    <text x="730" y="305" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="white">• Aggregates all reports</text>
+    <text x="730" y="318" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="white">• Updates global progress map</text>
+    <text x="730" y="331" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="white">• Maintains repository state</text>
+  </g>
+  
+  <!-- Layer 6: Decision Engine -->
+  <g id="decision-layer">
+    <text x="650" y="420" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#64748B">DECISION ENGINE</text>
+    <rect x="620" y="440" width="220" height="120" rx="12" fill="#1F2937" filter="url(#shadow)"/>
+    <text x="730" y="470" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" fill="white" font-weight="bold">O4-Mini</text>
+    <text x="730" y="490" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="white">Strategic Decision Maker</text>
+    <text x="730" y="508" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="white">• User recommendations</text>
+    <text x="730" y="521" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="white">• Collaboration suggestions</text>
+    <text x="730" y="534" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="white">• Plan refinements</text>
+    <text x="730" y="547" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="white">• Code analysis targeting</text>
+  </g>
+  
+  <!-- Layer 7: Code Extraction -->
+  <g id="extraction-layer">
+    <text x="950" y="380" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#64748B">CODE EXTRACTION</text>
+    
+    <rect x="920" y="400" width="160" height="80" rx="8" fill="url(#gptGrad)" filter="url(#shadow)"/>
+    <text x="1000" y="430" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="white" font-weight="bold">GPT-5 Nano</text>
+    <text x="1000" y="445" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="white">Code Extractor</text>
+    <text x="1000" y="460" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="white">• Targeted extraction</text>
+    <text x="1000" y="473" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="white">• Calls 1.5 Pro crew</text>
+    
+    <rect x="1120" y="400" width="160" height="80" rx="8" fill="url(#claudeGrad)" filter="url(#shadow)"/>
+    <text x="1200" y="430" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="white" font-weight="bold">Claude Sonnet</text>
+    <text x="1200" y="445" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="white">Edit Coordinator</text>
+    <text x="1200" y="460" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="white">• Code edit suggestions</text>
+    <text x="1200" y="473" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="white">• Final recommendations</text>
+  </g>
+  
+  <!-- GUI Display -->
+  <g id="gui-layer">
+    <text x="1050" y="140" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#64748B">REAL-TIME GUI</text>
+    <rect x="950" y="160" width="300" height="180" rx="12" fill="#F1F5F9" stroke="#E2E8F0" stroke-width="2" filter="url(#shadow)"/>
+    <text x="1100" y="185" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#334155">Progress Dashboard</text>
+    
+    <!-- Mini progress bars -->
+    <rect x="970" y="200" width="260" height="8" rx="4" fill="#E2E8F0"/>
+    <rect x="970" y="200" width="180" height="8" rx="4" fill="#10B981"/>
+    <text x="970" y="225" font-family="Arial, sans-serif" font-size="10" fill="#64748B">User 1: Frontend Components (70%)</text>
+    
+    <rect x="970" y="235" width="260" height="8" rx="4" fill="#E2E8F0"/>
+    <rect x="970" y="235" width="120" height="8" rx="4" fill="#F59E0B"/>
+    <text x="970" y="260" font-family="Arial, sans-serif" font-size="10" fill="#64748B">User 2: API Integration (45%)</text>
+    
+    <rect x="970" y="270" width="260" height="8" rx="4" fill="#E2E8F0"/>
+    <rect x="970" y="270" width="220" height="8" rx="4" fill="#EF4444"/>
+    <text x="970" y="295" font-family="Arial, sans-serif" font-size="10" fill="#64748B">User N: Database Setup (85%)</text>
+    
+    <text x="1100" y="320" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#64748B">Live updates from all agents</text>
+  </g>
+  
+  <!-- Arrows showing data flow -->
+  <!-- Users to Roadmap -->
+  <path d="M 250 160 Q 250 200 250 240" stroke="#6366F1" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  
+  <!-- Roadmap to Scanners -->
+  <path d="M 250 320 Q 250 360 120 400" stroke="#059669" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  <path d="M 250 320 Q 250 360 280 400" stroke="#059669" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  <path d="M 250 320 Q 250 360 440 400" stroke="#059669" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  
+  <!-- Scanners to Compilers -->
+  <path d="M 120 470 Q 120 530 120 560" stroke="#8B5CF6" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  <path d="M 280 470 Q 280 530 280 560" stroke="#8B5CF6" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  <path d="M 440 470 Q 440 530 440 560" stroke="#8B5CF6" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  
+  <!-- Compilers to Claude -->
+  <path d="M 280 560 Q 450 520 620 290" stroke="#DC2626" stroke-width="3" fill="none" marker-end="url(#arrowhead)"/>
+  
+  <!-- Claude to O4-Mini (bidirectional) -->
+  <path d="M 730 340 Q 730 390 730 440" stroke="#1F2937" stroke-width="3" fill="none" marker-end="url(#arrowhead)"/>
+  <path d="M 720 440 Q 720 390 720 340" stroke="#DC2626" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  <text x="750" y="390" font-family="Arial, sans-serif" font-size="9" fill="#64748B">Constant</text>
+  <text x="750" y="402" font-family="Arial, sans-serif" font-size="9" fill="#64748B">Communication</text>
+  
+  <!-- O4-Mini to Extraction -->
+  <path d="M 840 500 Q 880 480 920 450" stroke="#EA580C" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  <path d="M 840 520 Q 980 540 1120 450" stroke="#DC2626" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  
+  <!-- O4-Mini to Roadmap Orchestrator (Strategic summaries) -->
+  <path d="M 620 480 Q 450 400 350 280" stroke="#1F2937" stroke-width="2" fill="none" stroke-dasharray="3,3" marker-end="url(#arrowhead)"/>
+  <text x="450" y="370" font-family="Arial, sans-serif" font-size="8" fill="#64748B">Strategic</text>
+  <text x="450" y="382" font-family="Arial, sans-serif" font-size="8" fill="#64748B">Summaries</text>
+  <path d="M 620 480 Q 530 450 440 430" stroke="#1F2937" stroke-width="2" fill="none" stroke-dasharray="3,3" marker-end="url(#arrowhead)"/>
+  <text x="500" y="445" font-family="Arial, sans-serif" font-size="8" fill="#64748B">Mode Instructions</text>
+  
+  <!-- Claude to GUI -->
+  <path d="M 840 280 Q 890 260 950 250" stroke="#64748B" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  
+  <!-- GPT-5 Nano back to scanners (dotted line) -->
+  <path d="M 1000 400 Q 800 350 440 430" stroke="#EA580C" stroke-width="2" fill="none" stroke-dasharray="5,5" marker-end="url(#arrowhead)"/>
+  
+  <!-- Arrow marker definition -->
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#64748B"/>
+    </marker>
+  </defs>
+  
+  <!-- Token cost estimates -->
+  <g id="cost-estimates">
+    <text x="50" y="750" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#1E293B">Estimated Token Costs (per hour)</text>
+    
+    <text x="50" y="780" font-family="Arial, sans-serif" font-size="12" fill="#334155">Gemini 2.5 Pro (Roadmap): ~5K tokens → $0.01/hour</text>
+    <text x="50" y="800" font-family="Arial, sans-serif" font-size="12" fill="#334155">Gemini 1.5 Pro Crew (1-8x): ~10-80K tokens → $0.06-0.50/hour</text>
+    <text x="50" y="820" font-family="Arial, sans-serif" font-size="12" fill="#334155">Gemini 2.5 Flash (5x users): ~25K tokens → $0.06/hour</text>
+    <text x="50" y="840" font-family="Arial, sans-serif" font-size="12" fill="#334155">Claude 4.0 Sonnet: ~15K tokens → $0.27/hour</text>
+    <text x="50" y="860" font-family="Arial, sans-serif" font-size="12" fill="#334155">O4-Mini: ~8K tokens → $0.12/hour</text>
+    <text x="50" y="880" font-family="Arial, sans-serif" font-size="12" fill="#334155">GPT-5 Nano: ~20K tokens → $0.09/hour</text>
+    
+    <rect x="400" y="760" width="2" height="130" fill="#E2E8F0"/>
+    
+    <text x="420" y="780" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#059669">Total: ~$0.43-1.05/hour</text>
+    <text x="420" y="800" font-family="Arial, sans-serif" font-size="12" fill="#334155">8-hour hackathon: ~$3.44-8.40 total</text>
+    <text x="420" y="820" font-family="Arial, sans-serif" font-size="12" fill="#334155">10 participants: ~$34.40-84.00 total</text>
+    <text x="420" y="850" font-family="Arial, sans-serif" font-size="11" fill="#64748B">*Optimizations provide 30-70% total savings</text>
+    <text x="420" y="870" font-family="Arial, sans-serif" font-size="11" fill="#64748B">*Super Analysis Sessions: +$10-21 total (3-6 sessions)</text>
+  </g>
+  
+  <!-- Super Analysis Suite (Optional) -->
+  <g id="super-analysis" opacity="0.7">
+    <text x="950" y="650" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#7C3AED">🚀 SUPER ANALYSIS SESSIONS (OPTIONAL)</text>
+    <text x="950" y="670" font-family="Arial, sans-serif" font-size="10" fill="#64748B">Limited-use premium sessions • 3-6 sessions per hackathon • $10-21 total</text>
+    
+    <rect x="920" y="680" width="120" height="70" rx="8" fill="#7C3AED" filter="url(#shadow)"/>
+    <text x="980" y="705" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="white" font-weight="bold">Grok 4</text>
+    <text x="980" y="720" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="white">Critical Analysis</text>
+    <text x="980" y="733" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="white">15-30 min sessions</text>
+    
+    <rect x="1060" y="680" width="120" height="70" rx="8" fill="#EC4899" filter="url(#shadow)"/>
+    <text x="1120" y="700" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="white" font-weight="bold">Claude Optimus</text>
+    <text x="1120" y="715" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="white" font-weight="bold">4.1</text>
+    <text x="1120" y="730" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="white">Architecture Review</text>
+    <text x="1120" y="742" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="white">Strategic Sessions</text>
+    
+    <rect x="1200" y="680" width="120" height="70" rx="8" fill="#10B981" filter="url(#shadow)"/>
+    <text x="1260" y="705" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="white" font-weight="bold">ChatGPT 5</text>
+    <text x="1260" y="720" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="white">Session Coordinator</text>
+    <text x="1260" y="733" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="white">Critical Decisions</text>
+    
+    <!-- Collaboration arrows between super analysis agents -->
+    <path d="M 1040 715 Q 1050 715 1060 715" stroke="#FFD700" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+    <path d="M 1180 715 Q 1190 715 1200 715" stroke="#FFD700" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+    <text x="1120" y="770" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#7C3AED">Intensive Session Collaboration</text>
+  </g>
+  <g id="legend">
+    <text x="950" y="550" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#1E293B">Data Flow Legend</text>
+    <line x1="950" y1="570" x2="970" y2="570" stroke="#6366F1" stroke-width="2"/>
+    <text x="980" y="575" font-family="Arial, sans-serif" font-size="11" fill="#64748B">User Input</text>
+    
+    <line x1="950" y1="590" x2="970" y2="590" stroke="#059669" stroke-width="2"/>
+    <text x="980" y="595" font-family="Arial, sans-serif" font-size="11" fill="#64748B">Scanning Commands</text>
+    
+    <line x1="950" y1="610" x2="970" y2="610" stroke="#DC2626" stroke-width="3"/>
+    <text x="980" y="615" font-family="Arial, sans-serif" font-size="11" fill="#64748B">Report Aggregation</text>
+    
+    <line x1="950" y1="630" x2="970" y2="630" stroke="#EA580C" stroke-width="2" stroke-dasharray="5,5"/>
+    <text x="980" y="635" font-family="Arial, sans-serif" font-size="11" fill="#64748B">Code Extraction</text>
+  </g>
+</svg>
