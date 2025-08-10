@@ -164,36 +164,181 @@ export const firebaseFunctions = {
         return await callFunction('syncProjectWithGitHub', { userId, projectId });
     },
 
-    // NEW SCANNER FUNCTIONS
+    // NEW SCANNER FUNCTIONS - Using HTTP endpoints instead of callable functions
     async getScannerStatus() {
-        console.log('🎯 FRONTEND: Calling getScannerStatus');
-        const result = await callFunction('getScannerStatus', {});
-        console.log('🎯 FRONTEND: getScannerStatus result received:', {
-            agentManagerInitialized: result?.agentManagerStatus?.initialized,
-            totalAgents: result?.agentManagerStatus?.agents ? Object.keys(result.agentManagerStatus.agents).length : 0,
-            scannerManagerFound: result?.scannerDetails?.available
-        });
-        return result;
+        console.log('🎯 FRONTEND: Calling getScannerStatus via HTTP endpoint');
+
+        const timestamp = new Date().toISOString();
+        const url = `${BASE_URL}/scannerApi/status`;
+
+        console.log(`🚀 [${timestamp}] SCANNER: Calling HTTP endpoint:`, url);
+
+        try {
+            const startTime = performance.now();
+
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+
+            const endTime = performance.now();
+            const duration = Math.round(endTime - startTime);
+
+            console.log(`📡 [${timestamp}] SCANNER: HTTP response received:`, {
+                status: response.status,
+                statusText: response.statusText,
+                duration: duration + 'ms',
+                ok: response.ok
+            });
+
+            if (!response.ok) {
+                const errorBody = await response.text();
+                console.error(`❌ [${timestamp}] SCANNER: HTTP call failed:`, {
+                    status: response.status,
+                    statusText: response.statusText,
+                    errorBody: errorBody,
+                    url: url
+                });
+                throw new Error(`Scanner status call failed: ${response.statusText} - ${errorBody}`);
+            }
+
+            const result = await response.json();
+
+            console.log('🎯 FRONTEND: getScannerStatus result received:', {
+                agentManagerInitialized: result?.agentManagerStatus?.initialized,
+                totalAgents: result?.agentManagerStatus?.agents ? Object.keys(result.agentManagerStatus.agents).length : 0,
+                scannerManagerFound: result?.scannerDetails?.available
+            });
+
+            return result;
+
+        } catch (error) {
+            console.error(`💥 [${timestamp}] SCANNER: HTTP call exception:`, {
+                error: error instanceof Error ? error.message : String(error),
+                errorStack: error instanceof Error ? error.stack : 'No stack',
+                url: url
+            });
+            throw error;
+        }
     },
 
     async triggerRepositoryScan(projectId: string, scanType: string = 'medium', repoUrl?: string, githubToken?: string) {
-        console.log('🎯 FRONTEND: Calling triggerRepositoryScan with:', { projectId, scanType, repoUrl: repoUrl || 'none', hasToken: !!githubToken });
-        const result = await callFunction('triggerRepositoryScan', { projectId, scanType, repoUrl, githubToken });
-        console.log('🎯 FRONTEND: triggerRepositoryScan result received:', {
-            scanTriggered: result?.scanTriggered,
-            hasResult: !!result?.scanResult,
-            scanType: result?.scanType
-        });
-        return result;
+        console.log('🎯 FRONTEND: Calling triggerRepositoryScan via HTTP endpoint with:', { projectId, scanType, repoUrl: repoUrl || 'none', hasToken: !!githubToken });
+
+        const timestamp = new Date().toISOString();
+        const url = `${BASE_URL}/scannerApi/scan`;
+
+        console.log(`🚀 [${timestamp}] SCANNER: Calling HTTP endpoint:`, url);
+
+        try {
+            const startTime = performance.now();
+
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ projectId, scanType, repoUrl, githubToken })
+            });
+
+            const endTime = performance.now();
+            const duration = Math.round(endTime - startTime);
+
+            console.log(`📡 [${timestamp}] SCANNER: HTTP response received:`, {
+                status: response.status,
+                statusText: response.statusText,
+                duration: duration + 'ms',
+                ok: response.ok
+            });
+
+            if (!response.ok) {
+                const errorBody = await response.text();
+                console.error(`❌ [${timestamp}] SCANNER: HTTP call failed:`, {
+                    status: response.status,
+                    statusText: response.statusText,
+                    errorBody: errorBody,
+                    url: url
+                });
+                throw new Error(`Repository scan call failed: ${response.statusText} - ${errorBody}`);
+            }
+
+            const result = await response.json();
+
+            console.log('🎯 FRONTEND: triggerRepositoryScan result received:', {
+                scanTriggered: result?.scanTriggered,
+                hasResult: !!result?.scanResult,
+                scanType: result?.scanType
+            });
+
+            return result;
+
+        } catch (error) {
+            console.error(`💥 [${timestamp}] SCANNER: HTTP call exception:`, {
+                error: error instanceof Error ? error.message : String(error),
+                errorStack: error instanceof Error ? error.stack : 'No stack',
+                url: url
+            });
+            throw error;
+        }
     },
 
     async getScanResults(projectId: string) {
-        console.log('🎯 FRONTEND: Calling getScanResults with projectId:', projectId);
-        const result = await callFunction('getScanResults', { projectId });
-        console.log('🎯 FRONTEND: getScanResults result received:', {
-            resultsFound: result?.totalResults || 0,
-            projectId: result?.projectId
-        });
-        return result;
+        console.log('🎯 FRONTEND: Calling getScanResults via HTTP endpoint with projectId:', projectId);
+
+        const timestamp = new Date().toISOString();
+        const url = `${BASE_URL}/scannerApi/results/${projectId}`;
+
+        console.log(`🚀 [${timestamp}] SCANNER: Calling HTTP endpoint:`, url);
+
+        try {
+            const startTime = performance.now();
+
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+
+            const endTime = performance.now();
+            const duration = Math.round(endTime - startTime);
+
+            console.log(`📡 [${timestamp}] SCANNER: HTTP response received:`, {
+                status: response.status,
+                statusText: response.statusText,
+                duration: duration + 'ms',
+                ok: response.ok
+            });
+
+            if (!response.ok) {
+                const errorBody = await response.text();
+                console.error(`❌ [${timestamp}] SCANNER: HTTP call failed:`, {
+                    status: response.status,
+                    statusText: response.statusText,
+                    errorBody: errorBody,
+                    url: url
+                });
+                throw new Error(`Get scan results call failed: ${response.statusText} - ${errorBody}`);
+            }
+
+            const result = await response.json();
+
+            console.log('🎯 FRONTEND: getScanResults result received:', {
+                resultsFound: result?.totalResults || 0,
+                projectId: result?.projectId
+            });
+
+            return result;
+
+        } catch (error) {
+            console.error(`💥 [${timestamp}] SCANNER: HTTP call exception:`, {
+                error: error instanceof Error ? error.message : String(error),
+                errorStack: error instanceof Error ? error.stack : 'No stack',
+                url: url
+            });
+            throw error;
+        }
     }
 };
