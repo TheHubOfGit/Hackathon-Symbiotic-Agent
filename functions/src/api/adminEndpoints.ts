@@ -1,13 +1,10 @@
 // functions/src/api/adminEndpoints.ts
-import cors from 'cors';
 import { getFirestore } from 'firebase-admin/firestore';
 import * as functions from 'firebase-functions';
 import { AgentManager } from '../core/agentManager';
 import { HealthMonitor } from '../core/healthMonitor';
 import { TokenManager } from '../core/tokenManager';
 import { Logger } from '../utils/logger';
-
-const corsHandler = cors({ origin: true });
 
 // Lazy initialization to avoid Firebase issues during testing
 function getDb() {
@@ -19,13 +16,15 @@ function getLogger() {
 }
 
 export const admin = functions.https.onRequest(async (req, res) => {
-    // Handle CORS
+    // Set CORS headers manually
     res.set('Access-Control-Allow-Origin', '*');
-    res.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+    res.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
     res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    res.set('Access-Control-Max-Age', '3600');
 
+    // Handle CORS preflight request
     if (req.method === 'OPTIONS') {
-        res.status(204).send('');
+        res.status(204).end();
         return;
     }
 

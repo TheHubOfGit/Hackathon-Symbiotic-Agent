@@ -6,6 +6,7 @@ import { ConnectionStatus } from './components/ConnectionStatus';
 import { GitHubIntegration } from './components/GitHubIntegration';
 import { ProgressMap } from './components/ProgressMap';
 import { ProjectSetup } from './components/ProjectSetup';
+import { firebaseFunctions } from './utils/firebaseFunctions';
 
 interface User {
     id: string;
@@ -56,21 +57,17 @@ function App() {
                 if (savedUser) {
                     const userData = JSON.parse(savedUser);
 
-                    // Verify user still exists in backend
-                    const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/simpleUsers/${userData.id}`);
-                    if (response.ok) {
-                        const result = await response.json();
+                    // Verify user still exists in backend using Firebase Functions
+                    try {
+                        const result = await firebaseFunctions.getUser(userData.id);
                         setUser(result.user);
 
-                        // Try to fetch project from backend first
+                        // Try to fetch project using Firebase Functions
                         try {
-                            const projectResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/chat/project?userId=${userData.id}`);
-                            if (projectResponse.ok) {
-                                const projectResult = await projectResponse.json();
-                                if (projectResult.success && projectResult.project) {
-                                    setProject(projectResult.project);
-                                    localStorage.setItem('hackathon_project', JSON.stringify(projectResult.project));
-                                }
+                            const projectResult = await firebaseFunctions.getProject(userData.id);
+                            if (projectResult.success && projectResult.project) {
+                                setProject(projectResult.project);
+                                localStorage.setItem('hackathon_project', JSON.stringify(projectResult.project));
                             }
                         } catch (projectError) {
                             console.log('No project found in backend, checking localStorage');
@@ -88,7 +85,7 @@ function App() {
 
                         // For now, use a static project ID since we don't have project management yet
                         setProjectId('hackathon-2025-project');
-                    } else {
+                    } catch (userError) {
                         // User no longer exists, clear local storage
                         localStorage.removeItem('hackathon_user');
                         localStorage.removeItem('hackathon_project');
@@ -117,23 +114,10 @@ function App() {
     const handleProjectSetup = async (projectData: ProjectData) => {
         if (user) {
             try {
-                // Save project to backend
-                const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/chat/project`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        userId: user.id,
-                        projectData,
-                    }),
-                });
-
-                if (response.ok) {
-                    const result = await response.json();
-                    if (result.success) {
-                        setProjectId(result.projectId);
-                    }
+                // Save project to backend using Firebase Functions
+                const result = await firebaseFunctions.createProject(user.id, projectData);
+                if (result.success) {
+                    setProjectId(result.projectId);
                 }
             } catch (error) {
                 console.error('Error saving project to backend:', error);

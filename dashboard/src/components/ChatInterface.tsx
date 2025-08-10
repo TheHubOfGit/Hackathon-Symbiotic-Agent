@@ -1,5 +1,6 @@
 // dashboard/src/components/ChatInterface.tsx
 import React, { useEffect, useRef, useState } from 'react';
+import { firebaseFunctions } from '../utils/firebaseFunctions';
 
 interface Message {
     id: string;
@@ -39,11 +40,8 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         // Load initial messages from API
         const loadChatHistory = async () => {
             try {
-                const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/chat/history?userId=${userId}&projectId=${projectId}`);
-                if (response.ok) {
-                    const data = await response.json();
-                    setMessages(data.messages || []);
-                }
+                const data = await firebaseFunctions.getChatHistory(userId, projectId);
+                setMessages(data.messages || []);
             } catch (error) {
                 console.error('Failed to load chat history:', error);
             }
@@ -76,34 +74,19 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         // Add message to local state immediately
         setMessages(prev => [...prev, message]);
 
-        // Send to backend for AI processing via HTTP
+        // Send to backend for AI processing via Firebase Functions
         try {
-            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/chat/send`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    userId,
-                    content: newMessage.trim(),
+            const data = await firebaseFunctions.sendMessage(userId, newMessage.trim(), projectId);
+            if (data.response) {
+                // Add AI response to messages
+                setMessages(prev => [...prev, {
+                    id: `ai-${Date.now()}`,
+                    userId: 'ai',
+                    userName: 'Hackathon Agent',
+                    content: data.response,
                     timestamp: Date.now(),
-                    projectId
-                })
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                if (data.response) {
-                    // Add AI response to messages
-                    setMessages(prev => [...prev, {
-                        id: `ai-${Date.now()}`,
-                        userId: 'ai',
-                        userName: 'Hackathon Agent',
-                        content: data.response,
-                        timestamp: Date.now(),
-                        type: 'ai'
-                    }]);
-                }
+                    type: 'ai'
+                }]);
             }
         } catch (error) {
             console.error('Failed to send message:', error);

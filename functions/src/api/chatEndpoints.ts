@@ -16,7 +16,10 @@ export const chat = functions.https.onRequest(async (req, res) => {
         return;
     }
 
-    const path = req.path.replace('/chat', '');
+    // In Firebase Functions, req.path is the path after the function name
+    // So /chat/project becomes /project
+    const path = req.path || req.url || '';
+    console.log('Chat endpoint - Method:', req.method, 'Path:', path);
 
     try {
         switch (path) {
@@ -70,7 +73,27 @@ export const chat = functions.https.onRequest(async (req, res) => {
                     await handleSyncProjectWithGitHub(req, res);
                     break;
                 }
-                res.status(404).json({ error: 'Endpoint not found' });
+
+                // Default case - if no path or just '/', return API info
+                if (path === '' || path === '/') {
+                    res.json({
+                        success: true,
+                        message: 'Chat API is running',
+                        availableEndpoints: [
+                            '/project - GET/POST for project management',
+                            '/history - GET for chat history',
+                            '/send - POST for sending messages',
+                            '/status - GET for agent status'
+                        ]
+                    });
+                    break;
+                }
+
+                res.status(404).json({
+                    error: 'Endpoint not found',
+                    path: path,
+                    availableEndpoints: ['/project', '/history', '/send', '/status']
+                });
         }
     } catch (error) {
         console.error('Chat endpoint error:', error);
@@ -105,21 +128,32 @@ async function handleSendMessage(req: any, res: any) {
 }
 
 async function handleGetHistory(req: any, res: any) {
-    const { userId, limit = 50, offset = 0 } = req.query;
+    const { userId, projectId, limit = 50, offset = 0 } = req.query;
 
     if (!userId) {
         return res.status(400).json({ error: 'Missing userId' });
     }
 
+    console.log('Getting history for userId:', userId, 'projectId:', projectId);
+
     try {
         const db = getFirestore();
-        const messages = await db
-            .collection('processed_messages')
-            .where('userId', '==', userId)
+
+        // Build query - if we have a projectId, include it in the filter
+        let query = db.collection('processed_messages')
+            .where('userId', '==', userId);
+
+        if (projectId) {
+            query = query.where('projectId', '==', projectId);
+        }
+
+        const messages = await query
             .orderBy('timestamp', 'desc')
             .limit(parseInt(limit))
             .offset(parseInt(offset))
             .get();
+
+        console.log('Messages found:', messages.size);
 
         const history = messages.docs.map(doc => ({
             id: doc.id,
@@ -129,12 +163,14 @@ async function handleGetHistory(req: any, res: any) {
         res.json({
             success: true,
             messages: history,
-            total: messages.size
+            total: messages.size,
+            hasMore: messages.size === parseInt(limit)
         });
     } catch (error) {
         console.error('Error fetching history:', error);
         res.status(500).json({
-            error: 'Failed to fetch message history'
+            error: 'Failed to fetch message history',
+            details: error instanceof Error ? error.message : 'Unknown error'
         });
     }
 }
@@ -210,9 +246,11 @@ async function handleGetProject(req: any, res: any) {
             return res.status(400).json({ error: 'User ID is required' });
         }
 
+        console.log('Getting project for userId:', userId);
+
         const db = getFirestore();
 
-        // Get user's projects
+        // Get user's projects (Cloud Functions have admin access, so this should work)
         const projectsSnapshot = await db.collection('projects')
             .where('userId', '==', userId)
             .where('status', '==', 'active')
@@ -220,16 +258,28 @@ async function handleGetProject(req: any, res: any) {
             .limit(1)
             .get();
 
+        console.log('Projects found:', projectsSnapshot.size);
+
         if (projectsSnapshot.empty) {
-            return res.status(404).json({ error: 'No projects found for user' });
+            return res.status(200).json({
+                success: false,
+                project: null,
+                message: 'No projects found for user'
+            });
         }
 
         const projectDoc = projectsSnapshot.docs[0];
         if (!projectDoc) {
-            return res.status(404).json({ error: 'No projects found for user' });
+            return res.status(200).json({
+                success: false,
+                project: null,
+                message: 'No project document found'
+            });
         }
 
         const projectData = projectDoc.data();
+
+        console.log('Returning project:', projectDoc.id);
 
         res.json({
             success: true,
@@ -240,7 +290,10 @@ async function handleGetProject(req: any, res: any) {
         });
     } catch (error) {
         console.error('Error getting project:', error);
-        res.status(500).json({ error: 'Failed to get project' });
+        res.status(500).json({
+            error: 'Failed to get project',
+            details: error instanceof Error ? error.message : 'Unknown error'
+        });
     }
 }
 

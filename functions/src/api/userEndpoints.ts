@@ -1,18 +1,10 @@
 // functions/src/api/userEndpoints.ts
-import cors from 'cors';
 import { getFirestore } from 'firebase-admin/firestore';
 import * as functions from 'firebase-functions';
 import { AgentManager } from '../core/agentManager';
 import { ErrorHandler, ErrorSeverity } from '../core/errorHandler';
 import { UserSchema } from '../models/schemas';
 import { Logger } from '../utils/logger';
-
-const corsHandler = cors({
-    origin: true,
-    credentials: true,
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
-});
 
 // Lazy initialization to avoid Firebase issues during testing
 function getDb() {

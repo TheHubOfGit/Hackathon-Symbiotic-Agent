@@ -1,5 +1,6 @@
 import { Loader2, UserPlus } from 'lucide-react';
 import React, { useState } from 'react';
+import { firebaseFunctions } from '../utils/firebaseFunctions';
 
 interface UserData {
     name: string;
@@ -62,44 +63,17 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onAuthComplete }) => {
 
         try {
             if (isLogin) {
-                // Login existing user
-                const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/simpleUsers/login`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        email: formData.email,
-                        password: formData.password
-                    }),
-                });
-
-                if (!response.ok) {
-                    throw new Error('Login failed - check your email and password');
-                }
-
-                const result = await response.json();
+                // Login existing user using Firebase Functions
+                const result = await firebaseFunctions.loginUser(formData.email, formData.password);
                 localStorage.setItem('hackathon_user', JSON.stringify(result.user));
                 onAuthComplete(result.user);
             } else {
-                // Register new user
-                const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/simpleUsers`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        ...formData,
-                        registrationTime: Date.now(),
-                        status: 'active'
-                    }),
+                // Register new user using Firebase Functions
+                const result = await firebaseFunctions.registerUser({
+                    ...formData,
+                    registrationTime: Date.now(),
+                    status: 'active'
                 });
-
-                if (!response.ok) {
-                    throw new Error('Registration failed');
-                }
-
-                const result = await response.json();
                 localStorage.setItem('hackathon_user', JSON.stringify(result.user));
                 onAuthComplete(result.user);
             }
@@ -134,8 +108,8 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onAuthComplete }) => {
                             type="button"
                             onClick={() => setIsLogin(false)}
                             className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${!isLogin
-                                    ? 'bg-white text-indigo-600 shadow-sm'
-                                    : 'text-gray-500 hover:text-gray-700'
+                                ? 'bg-white text-indigo-600 shadow-sm'
+                                : 'text-gray-500 hover:text-gray-700'
                                 }`}
                         >
                             Register
@@ -144,8 +118,8 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onAuthComplete }) => {
                             type="button"
                             onClick={() => setIsLogin(true)}
                             className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${isLogin
-                                    ? 'bg-white text-indigo-600 shadow-sm'
-                                    : 'text-gray-500 hover:text-gray-700'
+                                ? 'bg-white text-indigo-600 shadow-sm'
+                                : 'text-gray-500 hover:text-gray-700'
                                 }`}
                         >
                             Login
