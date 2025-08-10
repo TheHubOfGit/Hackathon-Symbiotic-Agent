@@ -5,6 +5,7 @@ import { CommunicationMetrics } from './components/CommunicationMetrics';
 import { ConnectionStatus } from './components/ConnectionStatus';
 import { GitHubIntegration } from './components/GitHubIntegration';
 import { ProgressMap } from './components/ProgressMap';
+import { ProjectSelection } from './components/ProjectSelection';
 import { ProjectSetup } from './components/ProjectSetup';
 import { ScannerControl } from './components/ScannerControl';
 import { firebaseFunctions } from './utils/firebaseFunctions';
@@ -168,13 +169,34 @@ function App() {
         return <AuthForm onAuthComplete={handleRegistrationComplete} />;
     }
 
-    // Show project setup if no project data
+    // Show project selection/creation based on user role
     if (!project) {
-        return (
-            <div className="min-h-screen bg-gray-100 p-4">
-                <ProjectSetup onSetupComplete={handleProjectSetup} />
-            </div>
-        );
+        // Organizers can create projects, others select from existing projects
+        if (user.role === 'organizer') {
+            return (
+                <div className="min-h-screen bg-gray-100 p-4">
+                    <ProjectSetup onSetupComplete={handleProjectSetup} />
+                </div>
+            );
+        } else {
+            // Participants and mentors select from available projects
+            return (
+                <ProjectSelection
+                    user={user}
+                    onProjectSelected={(selectedProject) => {
+                        console.log('🎯 Project selected:', selectedProject);
+                        setProject(selectedProject);
+                        setProjectId(selectedProject.id);
+                        localStorage.setItem('hackathon_project', JSON.stringify(selectedProject));
+                    }}
+                    onCreateProject={() => {
+                        // This allows mentors to also create projects if needed
+                        // You can remove this if only organizers should create projects
+                        console.log('🎯 User chose to create project');
+                    }}
+                />
+            );
+        }
     }
 
     // Show GitHub integration if no repo connected

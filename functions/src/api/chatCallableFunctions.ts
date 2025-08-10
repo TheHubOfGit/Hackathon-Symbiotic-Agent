@@ -772,3 +772,81 @@ function generateAIRecommendations(analysis: any, phases: any[]) {
 
     return recommendations;
 }
+
+// Callable function for getting all available projects
+export const getAllProjects = functions.https.onCall(async (data, context) => {
+    const timestamp = new Date().toISOString();
+    console.log(`🔍 [${timestamp}] getAllProjects called with data:`, JSON.stringify(data, null, 2));
+
+    try {
+        const db = getFirestore();
+
+        console.log(`📋 [${timestamp}] Fetching all projects from Firestore...`);
+
+        // Get all projects from the projects collection
+        const projectsSnapshot = await db.collection('projects').get();
+
+        console.log(`📊 [${timestamp}] Found ${projectsSnapshot.size} projects in database`);
+
+        const projects = [];
+
+        for (const doc of projectsSnapshot.docs) {
+            const projectData = doc.data();
+            const projectId = doc.id;
+
+            console.log(`📄 [${timestamp}] Processing project ${projectId}:`, {
+                name: projectData.name,
+                userId: projectData.userId,
+                status: projectData.status,
+                hasGoals: !!projectData.goals
+            });
+
+            // Format project data for frontend
+            const project = {
+                id: projectId,
+                name: projectData.name || 'Untitled Project',
+                description: projectData.description || 'No description provided',
+                techStack: projectData.techStack || [],
+                deadline: projectData.deadline || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // Default to 7 days from now
+                organizerId: projectData.userId || 'unknown',
+                organizerName: projectData.organizerName || 'Unknown Organizer',
+                participantCount: projectData.participantCount || 1,
+                maxParticipants: projectData.maxParticipants || 8,
+                status: projectData.status || 'open',
+                goals: projectData.goals || [],
+                createdAt: projectData.createdAt,
+                lastUpdated: projectData.lastUpdated || Date.now()
+            };
+
+            projects.push(project);
+        }
+
+        // Filter to only return open projects that aren't full
+        const availableProjects = projects.filter(project =>
+            project.status === 'open' &&
+            (!project.maxParticipants || project.participantCount < project.maxParticipants)
+        );
+
+        console.log(`✅ [${timestamp}] getAllProjects result:`, {
+            totalProjects: projects.length,
+            availableProjects: availableProjects.length,
+            projectIds: availableProjects.map(p => p.id)
+        });
+
+        return {
+            success: true,
+            projects: availableProjects,
+            totalCount: projects.length,
+            availableCount: availableProjects.length,
+            timestamp: Date.now()
+        };
+
+    } catch (error) {
+        console.error(`💥 [${timestamp}] getAllProjects error:`, {
+            error: error instanceof Error ? error.message : String(error),
+            errorStack: error instanceof Error ? error.stack : 'No stack'
+        });
+
+        throw new functions.https.HttpsError('internal', `Failed to get projects: ${error instanceof Error ? error.message : String(error)}`);
+    }
+});

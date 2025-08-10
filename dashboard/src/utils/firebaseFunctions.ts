@@ -122,6 +122,16 @@ export const firebaseFunctions = {
         return result;
     },
 
+    async getAllProjects() {
+        console.log('🎯 FRONTEND: Calling getAllProjects');
+        const result = await callFunction('getAllProjects', {});
+        console.log('🎯 FRONTEND: getAllProjects result received:', {
+            projectCount: result?.projects?.length || 0,
+            projects: result?.projects || []
+        });
+        return result;
+    },
+
     // User functions
     async registerUser(userData: any) {
         console.log('🎯 FRONTEND: Calling registerUser with userData:', userData);
