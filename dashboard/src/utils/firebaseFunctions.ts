@@ -44,6 +44,10 @@ export const firebaseFunctions = {
         return await callFunction('sendMessage', { userId, message, messageContext });
     },
 
+    async getRoadmap(projectId: string) {
+        return await callFunction('getRoadmap', { projectId });
+    },
+
     // User functions
     async registerUser(userData: any) {
         return await callFunction('registerUser', userData);

@@ -1,56 +1,21 @@
 // functions/src/api/userCallableFunctions.ts
 import { getFirestore } from 'firebase-admin/firestore';
 import * as functions from 'firebase-functions';
-import { AgentManager } from '../core/agentManager';
-import { ErrorHandler, ErrorSeverity } from '../core/errorHandler';
-import { UserSchema } from '../models/schemas';
-import { Logger } from '../utils/logger';
 
-// Lazy initialization to avoid Firebase issues during testing
+// Simplified initialization without complex dependencies
 function getDb() {
     return getFirestore();
 }
 
-function getLogger() {
-    return new Logger('UserCallableFunctions');
-}
-
-function getErrorHandler() {
-    const db = getDb();
-    const logger = getLogger();
-    return new ErrorHandler(db, logger);
-}
-
-let agentManager: AgentManager | null = null;
-
-async function getAgentManager(): Promise<AgentManager> {
-    if (!agentManager) {
-        const db = getDb();
-        agentManager = new AgentManager(db);
-        await agentManager.initialize();
-    }
-    return agentManager;
-}
-
 // Firebase Callable Function for user registration
 export const registerUser = functions.https.onCall(async (data, context) => {
-    const validation = UserSchema.validate(data);
-
-    if (validation.error) {
-        throw new functions.https.HttpsError(
-            'invalid-argument',
-            'Validation failed',
-            { details: validation.error.details }
-        );
-    }
-
-    const userData = validation.value;
-    const userId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-
     try {
-        // Add user to system
-        const manager = await getAgentManager();
-        await manager.addUser(userId, {
+        const userData = data;
+        const userId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+        // Save user to Firestore directly
+        const db = getDb();
+        await db.collection('users').doc(userId).set({
             ...userData,
             status: 'active',
             joinedAt: Date.now()
@@ -59,19 +24,20 @@ export const registerUser = functions.https.onCall(async (data, context) => {
         return {
             success: true,
             userId,
+            user: {
+                id: userId,
+                ...userData
+            },
             message: 'User registered successfully'
         };
     } catch (error) {
-        getLogger().error('Failed to register user:', error);
+        console.error('Failed to register user:', error);
         throw new functions.https.HttpsError('internal', 'Failed to register user');
     }
 });
 
 // Login user
 export const loginUser = functions.https.onCall(async (data, context) => {
-    const logger = getLogger();
-    const errorHandler = getErrorHandler();
-
     try {
         const { email, password } = data;
 
@@ -107,7 +73,7 @@ export const loginUser = functions.https.onCall(async (data, context) => {
         // Return user data without password
         const { password: _, ...userWithoutPassword } = userData;
 
-        logger.info('User login successful', { userId: userDoc.id, email });
+        console.log('User login successful', { userId: userDoc.id, email });
 
         return {
             success: true,
@@ -117,10 +83,7 @@ export const loginUser = functions.https.onCall(async (data, context) => {
             }
         };
     } catch (error) {
-        await errorHandler.handleError(error as Error, ErrorSeverity.HIGH, {
-            operation: 'loginUser',
-            userId: data.email
-        });
+        console.error('Login error:', error);
         throw error;
     }
 });
@@ -134,15 +97,19 @@ export const userDeparture = functions.https.onCall(async (data, context) => {
     }
 
     try {
-        const manager = await getAgentManager();
-        await manager.removeUser(userId);
+        // For now, just mark user as inactive
+        const db = getDb();
+        await db.collection('users').doc(userId).update({
+            status: 'inactive',
+            leftAt: Date.now()
+        });
 
         return {
             success: true,
             message: 'User departure processed'
         };
     } catch (error) {
-        getLogger().error('Failed to process user departure:', error);
+        console.error('Failed to process user departure:', error);
         throw new functions.https.HttpsError('internal', 'Failed to process departure');
     }
 });
@@ -163,7 +130,7 @@ export const getUsers = functions.https.onCall(async (data, context) => {
             total: userData.length
         };
     } catch (error) {
-        getLogger().error('Failed to get users:', error);
+        console.error('Failed to get users:', error);
         throw new functions.https.HttpsError('internal', 'Failed to get users');
     }
 });
@@ -191,7 +158,7 @@ export const getUser = functions.https.onCall(async (data, context) => {
             }
         };
     } catch (error) {
-        getLogger().error('Failed to get user:', error);
+        console.error('Failed to get user:', error);
         if (error instanceof functions.https.HttpsError) {
             throw error;
         }
@@ -222,7 +189,7 @@ export const updateUser = functions.https.onCall(async (data, context) => {
             message: 'User updated successfully'
         };
     } catch (error) {
-        getLogger().error('Failed to update user:', error);
+        console.error('Failed to update user:', error);
         throw new functions.https.HttpsError('internal', 'Failed to update user');
     }
 });

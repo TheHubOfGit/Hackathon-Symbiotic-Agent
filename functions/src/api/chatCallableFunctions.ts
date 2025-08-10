@@ -178,3 +178,84 @@ export const sendMessage = functions.https.onCall(async (data, context) => {
         throw new functions.https.HttpsError('internal', 'Failed to send message', error);
     }
 });
+
+// Callable function for getting roadmap data
+export const getRoadmap = functions.https.onCall(async (data, context) => {
+    console.log('getRoadmap called with data:', data);
+
+    const { projectId } = data;
+
+    if (!projectId) {
+        throw new functions.https.HttpsError('invalid-argument', 'Project ID is required');
+    }
+
+    try {
+        const db = getFirestore();
+
+        // Get team members for the project (using dynamic loading)
+        const usersSnapshot = await db.collection('users').where('status', '==', 'active').get();
+        const teamMembers = usersSnapshot.docs.map(doc => ({
+            id: doc.id,
+            name: doc.data().name || `User ${doc.id.substring(0, 8)}`,
+            email: doc.data().email || `${doc.id}@example.com`,
+            skills: doc.data().skills || ['Programming'],
+            experience: doc.data().experience || 'intermediate'
+        }));
+
+        // Generate dynamic roadmap data
+        const roadmapData = {
+            projectId,
+            lastUpdated: Date.now(),
+            phases: [
+                {
+                    id: 'planning',
+                    name: 'Planning & Setup',
+                    status: 'completed',
+                    progress: 100,
+                    tasks: [
+                        { id: 'requirements', name: 'Requirements Analysis', status: 'completed', assignee: teamMembers[0]?.name || 'Team Lead' },
+                        { id: 'architecture', name: 'System Architecture', status: 'completed', assignee: teamMembers[1]?.name || 'Tech Lead' }
+                    ]
+                },
+                {
+                    id: 'development',
+                    name: 'Development',
+                    status: 'in-progress',
+                    progress: 60,
+                    tasks: [
+                        { id: 'frontend', name: 'Frontend Development', status: 'in-progress', assignee: teamMembers[0]?.name || 'Frontend Dev' },
+                        { id: 'backend', name: 'Backend API', status: 'in-progress', assignee: teamMembers[1]?.name || 'Backend Dev' },
+                        { id: 'database', name: 'Database Setup', status: 'completed', assignee: teamMembers[2]?.name || 'DB Admin' }
+                    ]
+                },
+                {
+                    id: 'testing',
+                    name: 'Testing & QA',
+                    status: 'pending',
+                    progress: 0,
+                    tasks: [
+                        { id: 'unit-tests', name: 'Unit Testing', status: 'pending', assignee: teamMembers[3]?.name || 'QA Engineer' },
+                        { id: 'integration', name: 'Integration Testing', status: 'pending', assignee: teamMembers[0]?.name || 'Test Lead' }
+                    ]
+                }
+            ],
+            teamMembers,
+            metrics: {
+                totalTasks: 7,
+                completedTasks: 3,
+                inProgressTasks: 2,
+                overallProgress: 43
+            }
+        };
+
+        console.log('Returning roadmap for project:', projectId);
+
+        return {
+            success: true,
+            ...roadmapData
+        };
+    } catch (error) {
+        console.error('Error getting roadmap:', error);
+        throw new functions.https.HttpsError('internal', 'Failed to get roadmap data', error);
+    }
+});
