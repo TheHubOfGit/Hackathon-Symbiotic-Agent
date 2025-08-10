@@ -52,51 +52,97 @@ export const CommunicationMetrics: React.FC<CommunicationMetricsProps> = ({
 
     useEffect(() => {
         const fetchRealData = async () => {
+            const fetchStartTime = new Date().toISOString();
+            const backendUrl = `${import.meta.env.VITE_BACKEND_URL}/simpleUsers`;
+
+            console.log(`🚀 [${fetchStartTime}] COMMUNICATIONMETRICS: Starting fetchRealData`, {
+                projectId,
+                timeframe,
+                backendUrl,
+                component: 'CommunicationMetrics'
+            });
+
             try {
+                console.log(`📡 [${fetchStartTime}] COMMUNICATIONMETRICS: About to call fetch to simpleUsers`);
+
+                const startTime = performance.now();
+
                 // Fetch real users from backend
-                const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/simpleUsers`);
+                const response = await fetch(backendUrl);
+
+                const endTime = performance.now();
+                const duration = Math.round(endTime - startTime);
+
+                console.log(`📡 [${fetchStartTime}] COMMUNICATIONMETRICS: Fetch response received`, {
+                    status: response.status,
+                    statusText: response.statusText,
+                    ok: response.ok,
+                    duration: duration + 'ms',
+                    headers: Object.fromEntries(response.headers.entries())
+                });
+
                 if (!response.ok) {
+                    const errorBody = await response.text();
+                    console.error(`❌ [${fetchStartTime}] COMMUNICATIONMETRICS: Fetch failed`, {
+                        status: response.status,
+                        statusText: response.statusText,
+                        errorBody,
+                        backendUrl
+                    });
                     throw new Error('Failed to fetch users');
                 }
 
                 const result = await response.json();
                 const realUsers = result.users || [];
 
-                // Generate realistic stats based on real users
-                const baseMessageCount = realUsers.length === 1 ? 0 : Math.max(realUsers.length * 5, 0);
-                const mockStats: MessageStats = {
-                    totalMessages: baseMessageCount,
-                    aiResponses: Math.floor(baseMessageCount * 0.2),
-                    userQuestions: Math.floor(baseMessageCount * 0.4),
-                    codeShares: Math.floor(baseMessageCount * 0.1),
-                    urgentMessages: Math.floor(baseMessageCount * 0.05),
-                    averageResponseTime: baseMessageCount > 0 ? 30 + Math.floor(Math.random() * 40) : 0
+                console.log(`✅ [${fetchStartTime}] COMMUNICATIONMETRICS: Successfully fetched users`, {
+                    usersCount: realUsers.length,
+                    resultKeys: Object.keys(result),
+                    firstUserSample: realUsers[0] ? {
+                        id: realUsers[0].id,
+                        name: realUsers[0].name,
+                        keys: Object.keys(realUsers[0])
+                    } : null
+                });
+
+                // For new projects with single users, show zero activity until there's actual communication
+                const isNewProject = realUsers.length <= 1;
+
+                console.log(`🔍 [${fetchStartTime}] COMMUNICATIONMETRICS: Project analysis`, {
+                    isNewProject,
+                    usersCount: realUsers.length,
+                    willShowZeroActivity: isNewProject
+                });
+
+                const stats: MessageStats = {
+                    totalMessages: 0,
+                    aiResponses: 0,
+                    userQuestions: 0,
+                    codeShares: 0,
+                    urgentMessages: 0,
+                    averageResponseTime: 0
                 };
 
                 // Generate team communication data from real users
-                const teamComm: TeamCommunication[] = realUsers.map((user: any, index: number) => {
-                    // For new projects with single users, show minimal activity
-                    const isNewProject = realUsers.length === 1;
-                    const baseMessages = isNewProject ? 0 : Math.floor(Math.random() * 20) + 5;
-
+                const teamCommData: TeamCommunication[] = realUsers.map((user: any, index: number) => {
                     return {
                         memberId: user.id,
                         memberName: user.name || `User ${index + 1}`,
-                        messagesCount: baseMessages,
-                        questionsAsked: Math.floor(baseMessages * 0.3),
-                        questionsAnswered: Math.floor(baseMessages * 0.2),
-                        codeSnippetsShared: Math.floor(baseMessages * 0.1),
-                        lastActiveTime: Date.now() - Math.floor(Math.random() * 30 * 60 * 1000), // Within last 30 min
-                        responseTime: baseMessages > 0 ? 20 + Math.floor(Math.random() * 60) : 0
+                        messagesCount: 0, // Start with zero until real activity
+                        questionsAsked: 0,
+                        questionsAnswered: 0,
+                        codeSnippetsShared: 0,
+                        lastActiveTime: Date.now(), // Show as recently active
+                        responseTime: 0
                     };
                 });
 
-                // Add some fallback users if no real users yet
-                if (teamComm.length === 0) {
-                    teamComm.push(
+                // Show helpful message for new projects
+                if (teamCommData.length === 0 || isNewProject) {
+                    teamCommData.push(
                         {
-                            memberId: 'setup-needed',
-                            memberName: '📋 Set up your project and connect GitHub for real metrics',
+                            memberId: 'getting-started',
+                            memberName: '🚀 Start chatting and collaborating to see metrics here',
                             messagesCount: 0,
                             questionsAsked: 0,
                             questionsAnswered: 0,
@@ -107,70 +153,112 @@ export const CommunicationMetrics: React.FC<CommunicationMetricsProps> = ({
                     );
                 }
 
-                const mockTrends: CommunicationTrend[] = Array.from({ length: 24 }, (_, i) => ({
+                // For new projects, show flat trend data (no artificial activity)
+                const trendsData: CommunicationTrend[] = Array.from({ length: 24 }, (_, i) => ({
                     hour: i,
-                    messageCount: Math.floor(Math.random() * (teamComm.length * 3)) + teamComm.length,
-                    urgentCount: Math.floor(Math.random() * 3),
-                    aiResponseCount: Math.floor(Math.random() * teamComm.length) + 1
+                    messageCount: 0,
+                    urgentCount: 0,
+                    aiResponseCount: 0
                 }));
 
-                setMessageStats(mockStats);
-                setTeamComm(teamComm);
-                setTrends(mockTrends);
-                setActiveUsers(teamComm.filter(m => Date.now() - m.lastActiveTime < 10 * 60 * 1000).length);
+                console.log(`📊 [${fetchStartTime}] COMMUNICATIONMETRICS: Setting state data`, {
+                    stats,
+                    teamCommCount: teamCommData.length,
+                    trendsCount: trendsData.length,
+                    activeUsers: teamCommData.filter(m => m.memberId !== 'getting-started').length
+                });
+
+                setMessageStats(stats);
+                setTeamComm(teamCommData);
+                setTrends(trendsData);
+                setActiveUsers(teamCommData.filter(m => m.memberId !== 'getting-started').length);
+
+                console.log(`✅ [${fetchStartTime}] COMMUNICATIONMETRICS: fetchRealData completed successfully`);
 
             } catch (error) {
-                console.error('Error fetching real data, using fallback:', error);
+                const errorTime = new Date().toISOString();
+                console.error(`💥 [${errorTime}] COMMUNICATIONMETRICS: Error fetching real data:`, {
+                    error: error instanceof Error ? error.message : String(error),
+                    errorStack: error instanceof Error ? error.stack : 'No stack',
+                    backendUrl
+                });
 
-                // Fallback to mock data if backend fails
-                const mockStats: MessageStats = {
-                    totalMessages: 247,
-                    aiResponses: 89,
-                    userQuestions: 156,
-                    codeShares: 34,
-                    urgentMessages: 12,
-                    averageResponseTime: 45
-                };
+                // Fallback for offline mode - show getting started state
+                setMessageStats({
+                    totalMessages: 0,
+                    aiResponses: 0,
+                    userQuestions: 0,
+                    codeShares: 0,
+                    urgentMessages: 0,
+                    averageResponseTime: 0
+                });
 
-                const mockTeamComm: TeamCommunication[] = [
+                setTeamComm([
                     {
-                        memberId: 'offline-demo',
-                        memberName: '⚠️ Backend Offline - Demo Data',
-                        messagesCount: 67,
-                        questionsAsked: 23,
-                        questionsAnswered: 41,
-                        codeSnippetsShared: 12,
-                        lastActiveTime: Date.now() - 5 * 60 * 1000,
-                        responseTime: 32
+                        memberId: 'offline-mode',
+                        memberName: '📶 Connect to see team metrics',
+                        messagesCount: 0,
+                        questionsAsked: 0,
+                        questionsAnswered: 0,
+                        codeSnippetsShared: 0,
+                        lastActiveTime: Date.now(),
+                        responseTime: 0
                     }
-                ];
+                ]);
 
-                const mockTrends: CommunicationTrend[] = Array.from({ length: 24 }, (_, i) => ({
+                setTrends(Array.from({ length: 24 }, (_, i) => ({
                     hour: i,
-                    messageCount: Math.floor(Math.random() * 20) + 5,
-                    urgentCount: Math.floor(Math.random() * 3),
-                    aiResponseCount: Math.floor(Math.random() * 8) + 2
-                }));
+                    messageCount: 0,
+                    urgentCount: 0,
+                    aiResponseCount: 0
+                })));
 
-                setMessageStats(mockStats);
-                setTeamComm(mockTeamComm);
-                setTrends(mockTrends);
-                setActiveUsers(1);
+                setActiveUsers(0);
+
+                console.log(`🔄 [${errorTime}] COMMUNICATIONMETRICS: Set fallback offline mode data`);
             }
         };
 
+        const componentStartTime = new Date().toISOString();
+        console.log(`🏗️ [${componentStartTime}] COMMUNICATIONMETRICS: Component useEffect starting`, {
+            projectId,
+            timeframe,
+            component: 'CommunicationMetrics'
+        });
+
         fetchRealData();
+
+        // Set up less frequent refresh for metrics (every 5 minutes)
+        // Since communication metrics don't change as rapidly as progress
+        console.log(`⏰ [${componentStartTime}] COMMUNICATIONMETRICS: Setting up 5-minute refresh interval`);
+
+        const metricsRefreshInterval = setInterval(() => {
+            const refreshTime = new Date().toISOString();
+
+            // Only refresh if the component is still visible
+            if (document.visibilityState === 'visible') {
+                console.log(`🔄 [${refreshTime}] COMMUNICATIONMETRICS: Executing 5-minute refresh (page visible)`);
+                fetchRealData();
+            } else {
+                console.log(`👁️ [${refreshTime}] COMMUNICATIONMETRICS: Skipping 5-minute refresh (page hidden)`);
+            }
+        }, 5 * 60 * 1000); // 5 minutes
+
+        return () => {
+            const cleanupTime = new Date().toISOString();
+            console.log(`🧹 [${cleanupTime}] COMMUNICATIONMETRICS: Component cleanup - clearing refresh interval`);
+            clearInterval(metricsRefreshInterval);
+        };
     }, [projectId, timeframe]);
 
     const formatTime = (seconds: number): string => {
         if (seconds < 60) return `${seconds}s`;
-        const minutes = Math.floor(seconds / 60);
-        const remainingSeconds = seconds % 60;
-        return remainingSeconds > 0 ? `${minutes}m ${remainingSeconds}s` : `${minutes}m`;
+        if (seconds < 3600) return `${Math.floor(seconds / 60)}m`;
+        return `${Math.floor(seconds / 3600)}h`;
     };
 
     const getActivityStatus = (lastActiveTime: number): { status: string; color: string } => {
-        const minutesAgo = (Date.now() - lastActiveTime) / (1000 * 60);
+        const minutesAgo = Math.floor((Date.now() - lastActiveTime) / (1000 * 60));
         if (minutesAgo < 5) return { status: 'Active', color: 'bg-green-500' };
         if (minutesAgo < 15) return { status: 'Recent', color: 'bg-yellow-500' };
         if (minutesAgo < 60) return { status: 'Away', color: 'bg-orange-500' };
@@ -178,13 +266,16 @@ export const CommunicationMetrics: React.FC<CommunicationMetricsProps> = ({
     };
 
     const calculateEngagementScore = (member: TeamCommunication): number => {
+        // For new projects, return 0 engagement
+        if (member.messagesCount === 0) return 0;
+
         const responseRatio = member.questionsAnswered / Math.max(member.questionsAsked, 1);
         const activityScore = Math.max(0, 100 - (Date.now() - member.lastActiveTime) / (1000 * 60 * 10)); // Decay over 10 minutes
         const codeShareBonus = member.codeSnippetsShared * 5;
         return Math.min(100, Math.round(responseRatio * 30 + activityScore * 0.5 + codeShareBonus));
     };
 
-    const maxTrendValue = Math.max(...trends.map(t => t.messageCount));
+    const maxTrendValue = Math.max(...trends.map(t => t.messageCount), 1); // Avoid division by zero
 
     return (
         <div className="bg-white rounded-lg shadow-sm p-6">
@@ -198,177 +289,88 @@ export const CommunicationMetrics: React.FC<CommunicationMetricsProps> = ({
                 <div className="flex items-center space-x-2 text-sm">
                     <div className="flex items-center space-x-1">
                         <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                        <span>{activeUsers} active now</span>
+                        <span className="text-gray-600">Live Tracking</span>
                     </div>
                 </div>
             </div>
 
-            {/* Key Metrics */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
-                <div className="bg-blue-50 rounded-lg p-4 text-center">
+            {/* Quick Stats */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                <div className="bg-blue-50 rounded-lg p-4">
                     <div className="text-2xl font-bold text-blue-600">{messageStats.totalMessages}</div>
-                    <div className="text-sm text-gray-600">Total Messages</div>
+                    <div className="text-blue-800 text-sm">Total Messages</div>
                 </div>
-
-                <div className="bg-green-50 rounded-lg p-4 text-center">
+                <div className="bg-green-50 rounded-lg p-4">
                     <div className="text-2xl font-bold text-green-600">{messageStats.aiResponses}</div>
-                    <div className="text-sm text-gray-600">AI Responses</div>
+                    <div className="text-green-800 text-sm">AI Responses</div>
                 </div>
-
-                <div className="bg-purple-50 rounded-lg p-4 text-center">
-                    <div className="text-2xl font-bold text-purple-600">{messageStats.userQuestions}</div>
-                    <div className="text-sm text-gray-600">Questions Asked</div>
+                <div className="bg-purple-50 rounded-lg p-4">
+                    <div className="text-2xl font-bold text-purple-600">{messageStats.codeShares}</div>
+                    <div className="text-purple-800 text-sm">Code Shares</div>
                 </div>
-
-                <div className="bg-orange-50 rounded-lg p-4 text-center">
-                    <div className="text-2xl font-bold text-orange-600">{messageStats.codeShares}</div>
-                    <div className="text-sm text-gray-600">Code Shared</div>
-                </div>
-
-                <div className="bg-red-50 rounded-lg p-4 text-center">
-                    <div className="text-2xl font-bold text-red-600">{messageStats.urgentMessages}</div>
-                    <div className="text-sm text-gray-600">Urgent Issues</div>
-                </div>
-
-                <div className="bg-gray-50 rounded-lg p-4 text-center">
-                    <div className="text-2xl font-bold text-gray-600">
-                        {formatTime(messageStats.averageResponseTime)}
-                    </div>
-                    <div className="text-sm text-gray-600">Avg Response</div>
+                <div className="bg-orange-50 rounded-lg p-4">
+                    <div className="text-2xl font-bold text-orange-600">{activeUsers}</div>
+                    <div className="text-orange-800 text-sm">Active Now</div>
                 </div>
             </div>
 
-            {/* Activity Trends */}
-            <div className="mb-8">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Activity Trends (24h)</h3>
-                <div className="bg-gray-50 rounded-lg p-4">
-                    <div className="flex items-end space-x-1 h-32">
-                        {trends.map((trend) => (
-                            <div key={trend.hour} className="flex-1 flex flex-col items-center">
-                                <div className="w-full flex flex-col justify-end h-24 space-y-1">
-                                    {/* AI Responses */}
-                                    <div
-                                        className="bg-green-400 rounded-sm"
-                                        style={{
-                                            height: `${(trend.aiResponseCount / maxTrendValue) * 80}px`,
-                                            minHeight: trend.aiResponseCount > 0 ? '2px' : '0'
-                                        }}
-                                        title={`AI Responses: ${trend.aiResponseCount}`}
-                                    />
-
-                                    {/* Regular Messages */}
-                                    <div
-                                        className="bg-blue-400 rounded-sm"
-                                        style={{
-                                            height: `${((trend.messageCount - trend.urgentCount - trend.aiResponseCount) / maxTrendValue) * 80}px`,
-                                            minHeight: trend.messageCount - trend.urgentCount - trend.aiResponseCount > 0 ? '2px' : '0'
-                                        }}
-                                        title={`Messages: ${trend.messageCount - trend.urgentCount - trend.aiResponseCount}`}
-                                    />
-
-                                    {/* Urgent Messages */}
-                                    <div
-                                        className="bg-red-400 rounded-sm"
-                                        style={{
-                                            height: `${(trend.urgentCount / maxTrendValue) * 80}px`,
-                                            minHeight: trend.urgentCount > 0 ? '2px' : '0'
-                                        }}
-                                        title={`Urgent: ${trend.urgentCount}`}
-                                    />
-                                </div>
-
-                                <div className="text-xs text-gray-500 mt-1">
-                                    {trend.hour.toString().padStart(2, '0')}:00
-                                </div>
-                            </div>
-                        ))}
+            {/* Response Time */}
+            {messageStats.totalMessages > 0 && (
+                <div className="mb-6 bg-gray-50 rounded-lg p-4">
+                    <div className="flex items-center justify-between">
+                        <div className="text-sm font-medium text-gray-700">Average Response Time</div>
+                        <div className="text-lg font-bold text-gray-900">
+                            {formatTime(messageStats.averageResponseTime)}
+                        </div>
                     </div>
-
-                    {/* Legend */}
-                    <div className="flex justify-center space-x-6 mt-4 text-sm">
-                        <div className="flex items-center space-x-1">
-                            <div className="w-3 h-3 bg-blue-400 rounded"></div>
-                            <span>Messages</span>
-                        </div>
-                        <div className="flex items-center space-x-1">
-                            <div className="w-3 h-3 bg-green-400 rounded"></div>
-                            <span>AI Responses</span>
-                        </div>
-                        <div className="flex items-center space-x-1">
-                            <div className="w-3 h-3 bg-red-400 rounded"></div>
-                            <span>Urgent</span>
+                    <div className="mt-2">
+                        <div className="bg-gray-200 rounded-full h-2">
+                            <div
+                                className={`h-2 rounded-full transition-all duration-300 ${messageStats.averageResponseTime <= 30 ? 'bg-green-500' :
+                                    messageStats.averageResponseTime <= 60 ? 'bg-yellow-500' :
+                                        messageStats.averageResponseTime <= 120 ? 'bg-orange-500' : 'bg-red-500'
+                                    }`}
+                                style={{ width: `${Math.min(100, (120 - messageStats.averageResponseTime) / 120 * 100)}%` }}
+                            ></div>
                         </div>
                     </div>
                 </div>
-            </div>
+            )}
 
-            {/* Team Communication Details */}
-            <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Team Communication</h3>
+            {/* Team Communication */}
+            <div className="mb-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Team Activity</h3>
                 <div className="space-y-3">
                     {teamComm.map((member) => {
-                        const activity = getActivityStatus(member.lastActiveTime);
+                        const activityStatus = getActivityStatus(member.lastActiveTime);
                         const engagementScore = calculateEngagementScore(member);
 
                         return (
-                            <div key={member.memberId} className="bg-gray-50 rounded-lg p-4">
-                                <div className="flex items-center justify-between mb-3">
-                                    <div className="flex items-center space-x-3">
-                                        <div className="flex items-center space-x-2">
-                                            <div className={`w-3 h-3 rounded-full ${activity.color}`}></div>
-                                            <h4 className="font-medium text-gray-900">{member.memberName}</h4>
+                            <div key={member.memberId} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                <div className="flex items-center space-x-3">
+                                    <div className={`w-3 h-3 rounded-full ${activityStatus.color}`}></div>
+                                    <div>
+                                        <div className="font-medium text-gray-900">{member.memberName}</div>
+                                        <div className="text-sm text-gray-500">
+                                            {activityStatus.status} • {member.messagesCount} messages
                                         </div>
-                                        <span className="text-sm text-gray-500">{activity.status}</span>
                                     </div>
+                                </div>
 
-                                    <div className="flex items-center space-x-4 text-sm">
-                                        <div className="text-center">
+                                <div className="text-right">
+                                    <div className="grid grid-cols-3 gap-4 text-center">
+                                        <div>
+                                            <div className="font-semibold text-gray-900">{member.questionsAsked}</div>
+                                            <div className="text-gray-500 text-xs">Asked</div>
+                                        </div>
+                                        <div>
+                                            <div className="font-semibold text-gray-900">{member.questionsAnswered}</div>
+                                            <div className="text-gray-500 text-xs">Answered</div>
+                                        </div>
+                                        <div>
                                             <div className="font-semibold text-gray-900">{engagementScore}</div>
-                                            <div className="text-gray-500">Engagement</div>
+                                            <div className="text-gray-500 text-xs">Engagement</div>
                                         </div>
-                                        <div className="text-center">
-                                            <div className="font-semibold text-gray-900">{formatTime(member.responseTime)}</div>
-                                            <div className="text-gray-500">Avg Response</div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                                    <div className="text-center">
-                                        <div className="font-semibold text-blue-600">{member.messagesCount}</div>
-                                        <div className="text-gray-500">Messages</div>
-                                    </div>
-
-                                    <div className="text-center">
-                                        <div className="font-semibold text-purple-600">{member.questionsAsked}</div>
-                                        <div className="text-gray-500">Questions Asked</div>
-                                    </div>
-
-                                    <div className="text-center">
-                                        <div className="font-semibold text-green-600">{member.questionsAnswered}</div>
-                                        <div className="text-gray-500">Helped Others</div>
-                                    </div>
-
-                                    <div className="text-center">
-                                        <div className="font-semibold text-orange-600">{member.codeSnippetsShared}</div>
-                                        <div className="text-gray-500">Code Shared</div>
-                                    </div>
-                                </div>
-
-                                {/* Engagement Progress Bar */}
-                                <div className="mt-3">
-                                    <div className="flex justify-between text-xs text-gray-500 mb-1">
-                                        <span>Team Engagement</span>
-                                        <span>{engagementScore}%</span>
-                                    </div>
-                                    <div className="w-full bg-gray-200 rounded-full h-2">
-                                        <div
-                                            className={`h-2 rounded-full transition-all duration-300 ${engagementScore >= 80 ? 'bg-green-500' :
-                                                engagementScore >= 60 ? 'bg-yellow-500' :
-                                                    engagementScore >= 40 ? 'bg-orange-500' : 'bg-red-500'
-                                                }`}
-                                            style={{ width: `${engagementScore}%` }}
-                                        />
                                     </div>
                                 </div>
                             </div>
@@ -377,36 +379,46 @@ export const CommunicationMetrics: React.FC<CommunicationMetricsProps> = ({
                 </div>
             </div>
 
-            {/* AI Performance Insights */}
-            <div className="mt-8 bg-blue-50 rounded-lg p-4">
-                <h3 className="text-lg font-semibold text-blue-900 mb-3">AI Assistant Insights</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                    <div className="text-center">
-                        <div className="text-2xl font-bold text-blue-600">
-                            {messageStats.totalMessages > 0
-                                ? Math.round((messageStats.aiResponses / messageStats.totalMessages) * 100)
-                                : 0}%
+            {/* Activity Trends */}
+            <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">24-Hour Activity Trend</h3>
+                <div className="bg-gray-50 rounded-lg p-4">
+                    {messageStats.totalMessages > 0 ? (
+                        <div className="flex items-end space-x-1 h-32">
+                            {trends.map((trend, index) => (
+                                <div key={trend.hour} className="flex-1 flex flex-col items-center">
+                                    <div
+                                        className="bg-blue-500 rounded-t w-full min-h-1 transition-all duration-300"
+                                        style={{
+                                            height: `${(trend.messageCount / maxTrendValue) * 100}%`
+                                        }}
+                                    ></div>
+                                    {index % 6 === 0 && (
+                                        <div className="text-xs text-gray-500 mt-1">{trend.hour}h</div>
+                                    )}
+                                </div>
+                            ))}
                         </div>
-                        <div className="text-blue-700">AI Response Rate</div>
-                    </div>
-
-                    <div className="text-center">
-                        <div className="text-2xl font-bold text-blue-600">
-                            {messageStats.userQuestions > 0
-                                ? Math.round((messageStats.aiResponses / messageStats.userQuestions) * 100)
-                                : 0}%
+                    ) : (
+                        <div className="text-center py-12 text-gray-500">
+                            <div className="text-lg mb-2">📊</div>
+                            <div className="text-sm">Activity trends will appear as your team starts collaborating</div>
                         </div>
-                        <div className="text-blue-700">Questions Answered</div>
-                    </div>
-
-                    <div className="text-center">
-                        <div className="text-2xl font-bold text-blue-600">
-                            {formatTime(messageStats.averageResponseTime)}
-                        </div>
-                        <div className="text-blue-700">Avg AI Response Time</div>
-                    </div>
+                    )}
                 </div>
             </div>
+
+            {/* Tips for New Projects */}
+            {messageStats.totalMessages === 0 && (
+                <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <h4 className="font-medium text-blue-900 mb-2">💡 Getting Started</h4>
+                    <div className="text-blue-800 text-sm space-y-1">
+                        <div>• Start chatting in the AI Chat tab to see communication metrics</div>
+                        <div>• Ask questions and share code snippets to increase engagement</div>
+                        <div>• Collaborate with team members to see real-time activity</div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

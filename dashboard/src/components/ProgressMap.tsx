@@ -46,52 +46,219 @@ export const ProgressMap: React.FC<ProgressMapProps> = ({ projectId, userId }) =
     const [isLoading, setIsLoading] = useState(true);
     // const [socket, setSocket] = useState<Socket | null>(null); // Disabled for Firebase Functions
     const [error, setError] = useState<string | null>(null);
+    const [nextRefreshIn, setNextRefreshIn] = useState<number>(0); // seconds until next refresh
 
     // Connect to your real backend system
     useEffect(() => {
         const fetchRoadmapData = async () => {
+            const fetchStartTime = new Date().toISOString();
+            console.log(`🚀 [${fetchStartTime}] PROGRESSMAP: Starting fetchRoadmapData`, {
+                projectId,
+                userId,
+                component: 'ProgressMap'
+            });
+
             try {
                 setIsLoading(true);
                 setError(null);
 
+                console.log(`📡 [${fetchStartTime}] PROGRESSMAP: About to call firebaseFunctions.getRoadmap`);
+
                 // Fetch current roadmap using Firebase Functions
                 const data = await firebaseFunctions.getRoadmap(projectId);
-                console.log('Roadmap data received:', data);
+
+                console.log(`✅ [${fetchStartTime}] PROGRESSMAP: Successfully received roadmap data:`, {
+                    phases: data?.phases?.length || 0,
+                    teamMembers: data?.teamMembers?.length || 0,
+                    lastUpdated: data?.lastUpdated,
+                    aiRecommendations: data?.aiRecommendations?.length || 0,
+                    dataSize: JSON.stringify(data).length + ' bytes'
+                });
+
                 setRoadmapData(data);
 
             } catch (err) {
-                console.error('Error fetching roadmap:', err);
+                const errorTime = new Date().toISOString();
+                console.error(`❌ [${errorTime}] PROGRESSMAP: Error fetching roadmap:`, {
+                    error: err instanceof Error ? err.message : String(err),
+                    errorStack: err instanceof Error ? err.stack : 'No stack',
+                    projectId,
+                    userId
+                });
+
                 setError(err instanceof Error ? err.message : 'Failed to load roadmap');
 
                 // Fallback to mock data if backend is not available
-                console.log('Using mock roadmap data as fallback');
+                console.log(`🔄 [${errorTime}] PROGRESSMAP: Using mock roadmap data as fallback`);
                 setRoadmapData(getMockRoadmapData());
 
                 // Clear error after 3 seconds since we have fallback data
                 setTimeout(() => setError(null), 3000);
             } finally {
                 setIsLoading(false);
+                const endTime = new Date().toISOString();
+                console.log(`🏁 [${endTime}] PROGRESSMAP: fetchRoadmapData completed`);
             }
         };
 
-        // Setup periodic refresh instead of WebSocket (Firebase Functions compatibility)
-        const setupPeriodicRefresh = () => {
-            console.log('Setting up periodic roadmap refresh');
+        // Smart refresh strategy - reduce API calls
+        const setupSmartRefresh = () => {
+            const setupTime = new Date().toISOString();
+            console.log(`🔄 [${setupTime}] PROGRESSMAP: Setting up smart roadmap refresh`, {
+                projectId,
+                userId,
+                initialInterval: '2 minutes'
+            });
 
-            // Refresh data every 30 seconds
-            const refreshInterval = setInterval(() => {
-                fetchRoadmapData();
-            }, 30000);
+            // Use exponential backoff for new projects with no activity
+            // Start with 2 minutes, increase to 5 minutes if no changes detected
+            let refreshInterval = 2 * 60 * 1000; // 2 minutes initially
+            let lastDataHash = '';
+            let consecutiveNoChanges = 0;
+            let countdownInterval: NodeJS.Timeout;
 
-            return refreshInterval;
+            const updateCountdown = (totalSeconds: number) => {
+                let remaining = Math.ceil(totalSeconds / 1000);
+                setNextRefreshIn(remaining);
+
+                console.log(`⏱️ PROGRESSMAP: Starting countdown from ${remaining} seconds`);
+
+                countdownInterval = setInterval(() => {
+                    remaining--;
+                    setNextRefreshIn(remaining);
+                    if (remaining <= 0) {
+                        clearInterval(countdownInterval);
+                        console.log(`⏰ PROGRESSMAP: Countdown completed`);
+                    }
+                }, 1000);
+            };
+
+            const scheduleNextRefresh = () => {
+                const scheduleTime = new Date().toISOString();
+                console.log(`📅 [${scheduleTime}] PROGRESSMAP: Scheduling next refresh`, {
+                    intervalMs: refreshInterval,
+                    intervalMinutes: Math.round(refreshInterval / 60000),
+                    consecutiveNoChanges
+                });
+
+                updateCountdown(refreshInterval);
+
+                setTimeout(async () => {
+                    const refreshTime = new Date().toISOString();
+                    console.log(`🔄 [${refreshTime}] PROGRESSMAP: Executing smart refresh`);
+
+                    try {
+                        // Only refresh if user is on the progress tab
+                        if (document.visibilityState === 'hidden') {
+                            console.log(`👁️ [${refreshTime}] PROGRESSMAP: Page hidden, skipping refresh`);
+                            scheduleNextRefresh();
+                            return;
+                        }
+
+                        console.log(`📡 [${refreshTime}] PROGRESSMAP: Making smart refresh API call`);
+                        const data = await firebaseFunctions.getRoadmap(projectId);
+
+                        const currentDataHash = JSON.stringify(data.phases?.map((p: any) => ({
+                            id: p.id,
+                            status: p.status,
+                            progress: p.progress
+                        })));
+
+                        console.log(`🔍 [${refreshTime}] PROGRESSMAP: Data comparison`, {
+                            currentHashLength: currentDataHash.length,
+                            lastHashLength: lastDataHash.length,
+                            hashesMatch: currentDataHash === lastDataHash,
+                            consecutiveNoChanges
+                        });
+
+                        // Check if data actually changed
+                        if (currentDataHash === lastDataHash) {
+                            consecutiveNoChanges++;
+                            console.log(`📊 [${refreshTime}] PROGRESSMAP: No data changes detected`, {
+                                consecutiveNoChanges,
+                                willIncreaseInterval: consecutiveNoChanges >= 3
+                            });
+
+                            // Increase interval if no changes (max 5 minutes)
+                            if (consecutiveNoChanges >= 3) {
+                                const oldInterval = refreshInterval;
+                                refreshInterval = Math.min(5 * 60 * 1000, refreshInterval * 1.5);
+                                console.log(`⏰ [${refreshTime}] PROGRESSMAP: Increasing refresh interval`, {
+                                    oldIntervalMinutes: Math.round(oldInterval / 60000),
+                                    newIntervalMinutes: Math.round(refreshInterval / 60000)
+                                });
+                            }
+                        } else {
+                            // Data changed, reset to faster refresh
+                            console.log(`🎉 [${refreshTime}] PROGRESSMAP: Data changes detected!`, {
+                                oldConsecutiveNoChanges: consecutiveNoChanges,
+                                oldIntervalMinutes: Math.round(refreshInterval / 60000)
+                            });
+
+                            consecutiveNoChanges = 0;
+                            refreshInterval = 2 * 60 * 1000;
+                            lastDataHash = currentDataHash;
+                            setRoadmapData(data);
+
+                            console.log(`✅ [${refreshTime}] PROGRESSMAP: Updated roadmap data with changes`);
+                        }
+
+                        console.log(`📝 [${refreshTime}] PROGRESSMAP: Next refresh scheduled`, {
+                            intervalSeconds: refreshInterval / 1000,
+                            intervalMinutes: Math.round(refreshInterval / 60000)
+                        });
+
+                        scheduleNextRefresh();
+                    } catch (error) {
+                        const errorTime = new Date().toISOString();
+                        console.error(`💥 [${errorTime}] PROGRESSMAP: Smart refresh error:`, {
+                            error: error instanceof Error ? error.message : String(error),
+                            errorStack: error instanceof Error ? error.stack : 'No stack',
+                            willRetryWithLongerInterval: true
+                        });
+
+                        // On error, retry with longer interval
+                        refreshInterval = 5 * 60 * 1000;
+                        scheduleNextRefresh();
+                    }
+                }, refreshInterval);
+            };
+
+            // Start the smart refresh cycle
+            console.log(`🚀 [${setupTime}] PROGRESSMAP: Starting smart refresh cycle`);
+            scheduleNextRefresh();
+
+            // Return cleanup function
+            return () => {
+                const cleanupTime = new Date().toISOString();
+                console.log(`🧹 [${cleanupTime}] PROGRESSMAP: Smart refresh cleanup started`);
+
+                if (countdownInterval) {
+                    clearInterval(countdownInterval);
+                    console.log(`🧹 [${cleanupTime}] PROGRESSMAP: Cleared countdown interval`);
+                }
+                console.log(`🧹 [${cleanupTime}] PROGRESSMAP: Smart refresh cleanup completed`);
+            };
         };
 
+        const componentStartTime = new Date().toISOString();
+        console.log(`🏗️ [${componentStartTime}] PROGRESSMAP: Component useEffect starting`, {
+            projectId,
+            userId,
+            component: 'ProgressMap'
+        });
+
         fetchRoadmapData();
-        const refreshInterval = setupPeriodicRefresh();
+        const cleanupRefresh = setupSmartRefresh();
 
         // Cleanup
         return () => {
-            clearInterval(refreshInterval);
+            const cleanupTime = new Date().toISOString();
+            console.log(`🧹 [${cleanupTime}] PROGRESSMAP: Component useEffect cleanup`, {
+                projectId,
+                userId
+            });
+            cleanupRefresh();
         };
     }, [projectId, userId]);
 
@@ -224,6 +391,12 @@ export const ProgressMap: React.FC<ProgressMapProps> = ({ projectId, userId }) =
                     <h2 className="text-xl font-semibold text-gray-900">AI-Powered Roadmap</h2>
                     <div className="flex items-center space-x-4 text-sm text-gray-600">
                         <span>Last updated: {new Date(roadmapData.lastUpdated).toLocaleTimeString()}</span>
+                        {nextRefreshIn > 0 && (
+                            <span className="flex items-center space-x-1 text-xs">
+                                <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse"></div>
+                                <span>Next refresh: {Math.floor(nextRefreshIn / 60)}:{(nextRefreshIn % 60).toString().padStart(2, '0')}</span>
+                            </span>
+                        )}
                     </div>
                 </div>
 
@@ -312,7 +485,7 @@ export const ProgressMap: React.FC<ProgressMapProps> = ({ projectId, userId }) =
                                             <div>
                                                 <span className="text-gray-600">Hours:</span>
                                                 <span className="ml-2 font-medium">
-                                                    {task.actualHours || 0} / {task.estimatedHours || 'N/A'}h
+                                                    {task.actualHours || 0} / {task.estimatedHours ? `${task.estimatedHours}h` : 'N/A'}
                                                 </span>
                                             </div>
                                         </div>

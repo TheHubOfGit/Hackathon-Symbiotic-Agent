@@ -1,5 +1,5 @@
 // functions/src/core/agentManager.ts
-import { Firestore, Timestamp } from '@google-cloud/firestore';
+import { Firestore } from '@google-cloud/firestore';
 import { CodeExtractor } from '../agents/codeExtractor';
 import { DecisionEngine } from '../agents/decisionEngine';
 import { EditCoordinator } from '../agents/editCoordinator';
@@ -29,29 +29,56 @@ export class AgentManager {
     }
 
     async initialize() {
-        if (this.initialized) return;
+        if (this.initialized) {
+            this.logger.info('🔄 AgentManager already initialized, skipping');
+            return;
+        }
 
-        this.logger.info('Initializing Agent Manager');
+        const initStartTime = new Date().toISOString();
+        this.logger.info(`🚀 [${initStartTime}] STARTING AgentManager Initialization`);
 
         try {
             // Initialize core services first
+            this.logger.info(`📡 [${initStartTime}] Initializing MessageRouter...`);
             await this.messageRouter.initialize();
+            this.logger.info(`✅ [${initStartTime}] MessageRouter initialized`);
+
+            this.logger.info(`🏥 [${initStartTime}] Initializing HealthMonitor...`);
             await this.healthMonitor.initialize();
+            this.logger.info(`✅ [${initStartTime}] HealthMonitor initialized`);
+
+            this.logger.info(`🎟️ [${initStartTime}] Initializing TokenManager...`);
             await this.tokenManager.initialize();
+            this.logger.info(`✅ [${initStartTime}] TokenManager initialized`);
 
             // Initialize agents in order of dependencies
+            this.logger.info(`🤖 [${initStartTime}] Starting agent initialization...`);
             await this.initializeAgents();
+            this.logger.info(`✅ [${initStartTime}] All agents initialized`);
 
             // Start health monitoring
+            this.logger.info(`🏥 [${initStartTime}] Starting health monitoring...`);
             this.healthMonitor.startMonitoring(this.agents);
+            this.logger.info(`✅ [${initStartTime}] Health monitoring started`);
 
             // Start token tracking
+            this.logger.info(`🎟️ [${initStartTime}] Starting token tracking...`);
             this.tokenManager.startTracking(this.agents);
+            this.logger.info(`✅ [${initStartTime}] Token tracking started`);
 
             this.initialized = true;
-            this.logger.info('Agent Manager initialized successfully');
+            const endTime = new Date().toISOString();
+            this.logger.info(`🎉 [${endTime}] AgentManager initialized successfully!`);
+            this.logger.info(`📊 [${endTime}] Total agents initialized: ${this.agents.size}`);
+
+            // Log all initialized agents
+            for (const [id, agent] of this.agents) {
+                this.logger.info(`🤖 [${endTime}] Agent: ${id} (${agent.constructor.name})`);
+            }
+
         } catch (error) {
-            this.logger.error('Failed to initialize Agent Manager:', error);
+            const errorTime = new Date().toISOString();
+            this.logger.error(`💥 [${errorTime}] Failed to initialize Agent Manager:`, error);
             throw error;
         }
     }

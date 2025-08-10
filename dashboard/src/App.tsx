@@ -6,6 +6,7 @@ import { ConnectionStatus } from './components/ConnectionStatus';
 import { GitHubIntegration } from './components/GitHubIntegration';
 import { ProgressMap } from './components/ProgressMap';
 import { ProjectSetup } from './components/ProjectSetup';
+import { ScannerControl } from './components/ScannerControl';
 import { firebaseFunctions } from './utils/firebaseFunctions';
 
 interface User {
@@ -39,7 +40,7 @@ interface GitHubRepo {
 }
 
 function App() {
-    const [activeTab, setActiveTab] = useState<'chat' | 'progress' | 'metrics'>('chat');
+    const [activeTab, setActiveTab] = useState<'chat' | 'progress' | 'metrics' | 'scanner'>('chat');
     const [user, setUser] = useState<User | null>(null);
     const [project, setProject] = useState<ProjectData | null>(null);
     const [githubRepo, setGithubRepo] = useState<GitHubRepo | null>(null);
@@ -67,24 +68,32 @@ function App() {
                             const projectResult = await firebaseFunctions.getProject(userData.id);
                             if (projectResult.success && projectResult.project) {
                                 setProject(projectResult.project);
+                                setProjectId(projectResult.project.id); // Use actual project ID from backend
+                                console.log('✅ Loaded project from backend:', projectResult.project.id);
                                 localStorage.setItem('hackathon_project', JSON.stringify(projectResult.project));
+                            } else {
+                                console.log('⚠️ No project found in backend for user');
+                                // If no project exists, we'll set the project ID when a project is created
                             }
                         } catch (projectError) {
-                            console.log('No project found in backend, checking localStorage');
+                            console.log('❌ Error loading project from backend:', projectError);
                         }
 
                         // Fallback to localStorage project data if backend fetch failed
                         if (!project && savedProject) {
-                            setProject(JSON.parse(savedProject));
+                            const localProject = JSON.parse(savedProject);
+                            setProject(localProject);
+                            // Try to use the project ID from local storage if it exists
+                            if (localProject.id) {
+                                setProjectId(localProject.id);
+                                console.log('📱 Using project ID from localStorage:', localProject.id);
+                            }
                         }
 
                         // Load GitHub repo if exists  
                         if (savedRepo) {
                             setGithubRepo(JSON.parse(savedRepo));
                         }
-
-                        // For now, use a static project ID since we don't have project management yet
-                        setProjectId('hackathon-2025-project');
                     } catch (userError) {
                         // User no longer exists, clear local storage
                         localStorage.removeItem('hackathon_user');
@@ -108,7 +117,8 @@ function App() {
 
     const handleRegistrationComplete = (newUser: User) => {
         setUser(newUser);
-        setProjectId('hackathon-2025-project');
+        // Don't set a hardcoded project ID here - wait for project to be created
+        console.log('👤 User created, waiting for project setup to set project ID');
     };
 
     const handleProjectSetup = async (projectData: ProjectData) => {
@@ -251,7 +261,8 @@ function App() {
                         {[
                             { id: 'chat', label: '💬 AI Chat', desc: 'Real-time team communication' },
                             { id: 'progress', label: '📊 Progress', desc: 'Project timeline & milestones' },
-                            { id: 'metrics', label: '📈 Metrics', desc: 'Team collaboration analytics' }
+                            { id: 'metrics', label: '📈 Metrics', desc: 'Team collaboration analytics' },
+                            { id: 'scanner', label: '🔍 Scanner', desc: 'AI repository scanner control' }
                         ].map((tab) => (
                             <button
                                 key={tab.id}
@@ -293,6 +304,13 @@ function App() {
                         <CommunicationMetrics
                             projectId={projectId}
                             timeframe="6h"
+                        />
+                    )}
+
+                    {activeTab === 'scanner' && (
+                        <ScannerControl
+                            projectId={projectId}
+                            userId={user.id}
                         />
                     )}
                 </div>
