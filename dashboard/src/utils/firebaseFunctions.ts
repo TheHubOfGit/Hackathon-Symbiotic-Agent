@@ -1,6 +1,23 @@
 // dashboard/src/utils/firebaseFunctions.ts
 // Simple Firebase Callable Functions client without full Firebase SDK
 
+import { getApps, initializeApp } from 'firebase/app';
+import { getFunctions, httpsCallable } from 'firebase/functions';
+
+// Initialize Firebase app if not already initialized
+const firebaseConfig = {
+    projectId: 'hackathon-agent-ce35f'
+};
+
+let app;
+if (getApps().length === 0) {
+    app = initializeApp(firebaseConfig);
+} else {
+    app = getApps()[0];
+}
+
+const functions = getFunctions(app);
+
 const FIREBASE_PROJECT_ID = 'hackathon-agent-ce35f';
 const REGION = 'us-central1';
 const BASE_URL = `https://${REGION}-${FIREBASE_PROJECT_ID}.cloudfunctions.net`;
@@ -123,13 +140,20 @@ export const firebaseFunctions = {
     },
 
     async getAllProjects() {
-        console.log('🎯 FRONTEND: Calling getAllProjects');
-        const result = await callFunction('getAllProjects', {});
-        console.log('🎯 FRONTEND: getAllProjects result received:', {
-            projectCount: result?.projects?.length || 0,
-            projects: result?.projects || []
-        });
-        return result;
+        console.log('🎯 FRONTEND: Calling getAllProjects via Firebase SDK');
+        try {
+            const getAllProjectsFunction = httpsCallable(functions, 'getAllProjects');
+            const result = await getAllProjectsFunction({});
+            const data = result.data as any;
+            console.log('🎯 FRONTEND: getAllProjects result received:', {
+                projectCount: data?.projects?.length || 0,
+                projects: data?.projects || []
+            });
+            return data;
+        } catch (error) {
+            console.error('🚨 FRONTEND: getAllProjects error:', error);
+            throw error;
+        }
     },
 
     // User functions
