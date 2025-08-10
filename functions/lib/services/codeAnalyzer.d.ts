@@ -1,0 +1,31 @@
+export declare class CodeAnalyzer {
+    analyzeFiles(files: string[]): Promise<any>;
+    getChangedFiles(repoState: any): Promise<string[]>;
+    deepAnalyze(files: string[]): Promise<any>;
+    fullAnalysis(files: string[]): Promise<any>;
+    analyzeDependencies(): Promise<any>;
+    scanVulnerabilities(): Promise<any>;
+    profilePerformance(): Promise<any>;
+    reviewArchitecture(): Promise<any>;
+    calculateMetrics(): Promise<any>;
+    detectPatterns(): Promise<any>;
+    performanceAnalysis(repoState: any): Promise<any>;
+    qualityAnalysis(repoState: any): Promise<any>;
+    securityAnalysis(repoState: any): Promise<any>;
+    architectureAnalysis(repoState: any): Promise<any>;
+    dependencyAnalysis(repoState: any): Promise<any>;
+    changeAnalysis(repoState: any): Promise<any>;
+    incrementalAnalysis(repoState: any, lastScanTime: number): Promise<any>;
+    analyzeTarget(target: any): Promise<any>;
+    private readFile;
+    private parseCode;
+    private calculateFileMetrics;
+    private calculateComplexity;
+    private extractDependencies;
+    private detectFilePatterns;
+    private securityScan;
+    private performanceAnalysisInternal;
+    private qualityAnalysisInternal;
+    private checkVulnerabilities;
+    private analyzeFunctionTarget;
+}

@@ -1,0 +1,37 @@
+import { Firestore } from '@google-cloud/firestore';
+import { DecisionEngine } from '../agents/decisionEngine';
+import { Logger } from '../utils/logger';
+import { MessageRouter } from './messageRouter';
+export declare class UserCommunicationHub {
+    private db;
+    private messageRouter;
+    private decisionEngine;
+    private logger;
+    private processor1;
+    private processor2;
+    private messageQueue;
+    private io;
+    private activeConnections;
+    constructor(db: Firestore, messageRouter: MessageRouter, decisionEngine: DecisionEngine, logger: Logger);
+    private initializeProcessors;
+    private setupWebSocketServer;
+    private handleSocketConnection;
+    handleIncomingMessage(userId: string, message: string, context: any): Promise<void>;
+    private startQueueProcessor;
+    private processMessage;
+    private getAvailableProcessor;
+    private handleProcessedMessage;
+    private generateRecommendations;
+    private sendUserResponse;
+    private generateUserResponse;
+    private calculateMessagePriority;
+    private getUserName;
+    private getUserCurrentTasks;
+    private getUserStatus;
+    private findUsersWithExpertise;
+    private identifyAffectedUsers;
+    private determinePriority;
+    private sendAcknowledgment;
+    private handleProcessingError;
+    private generateId;
+}

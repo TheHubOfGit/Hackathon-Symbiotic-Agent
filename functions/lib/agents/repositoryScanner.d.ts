@@ -1,0 +1,33 @@
+import { Firestore } from '@google-cloud/firestore';
+import { MessageRouter } from '../core/messageRouter';
+import { Logger } from '../utils/logger';
+export declare class RepositoryScanner {
+    private id;
+    private db;
+    private messageRouter;
+    private logger;
+    private gemini;
+    private model;
+    private codeAnalyzer;
+    private gitService;
+    private mode;
+    private focusArea;
+    private busy;
+    private lastScanTime;
+    constructor(id: string, db: Firestore, messageRouter: MessageRouter, logger: Logger);
+    private getGitService;
+    private initialize;
+    private startContinuousMonitoring;
+    setMode(mode: string): Promise<void>;
+    setFocusArea(area: string): Promise<void>;
+    performScan(options: any): Promise<any>;
+    private analyzeRepository;
+    private analyzeFocusArea;
+    private generateInsights;
+    performTargetedScan(target: any): Promise<any>;
+    private performIncrementalScan;
+    private storeResults;
+    private reportToCompilers;
+    isBusy(): boolean;
+    cleanup(): Promise<void>;
+}

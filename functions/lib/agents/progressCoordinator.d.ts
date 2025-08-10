@@ -1,0 +1,35 @@
+import { Firestore } from '@google-cloud/firestore';
+import { MessageRouter } from '../core/messageRouter';
+import { Logger } from '../utils/logger';
+export declare class ProgressCoordinator {
+    private db;
+    private messageRouter;
+    private logger;
+    private anthropic;
+    private globalState;
+    private userProgress;
+    private updateInterval;
+    constructor(db: Firestore, messageRouter: MessageRouter, logger: Logger);
+    private initialize;
+    private setupMessageHandlers;
+    private loadGlobalState;
+    private startContinuousCoordination;
+    private handleUserProgress;
+    private handleRepositoryAnalysis;
+    private performGlobalCoordination;
+    private communicateWithDecisionEngine;
+    private requestStrategicGuidance;
+    private checkDependencies;
+    private updateGlobalProgress;
+    private identifyConflicts;
+    private findAffectedUsers;
+    private escalateConflicts;
+    private updateProgressMap;
+    private getMilestoneStatus;
+    private checkMilestoneCompletion;
+    private checkCriterion;
+    private notifyDependencyIssue;
+    private saveGlobalState;
+    private handleRoadmapCreated;
+    cleanup(): void;
+}

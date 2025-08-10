@@ -1,0 +1,86 @@
+export declare const AGENT_TYPES: {
+    readonly ROADMAP_ORCHESTRATOR: "roadmap_orchestrator";
+    readonly REPOSITORY_SCANNER: "repository_scanner";
+    readonly REPOSITORY_SCANNER_MANAGER: "repository_scanner_manager";
+    readonly USER_COMPILER: "user_compiler";
+    readonly PROGRESS_COORDINATOR: "progress_coordinator";
+    readonly DECISION_ENGINE: "decision_engine";
+    readonly CODE_EXTRACTOR: "code_extractor";
+    readonly EDIT_COORDINATOR: "edit_coordinator";
+    readonly COMMUNICATION_HUB: "communication_hub";
+    readonly MESSAGE_PROCESSOR: "message_processor";
+};
+export declare const MESSAGE_TYPES: {
+    readonly USER_REGISTERED: "USER_REGISTERED";
+    readonly USER_DEPARTED: "USER_DEPARTED";
+    readonly USER_MESSAGE: "USER_MESSAGE";
+    readonly USER_PROGRESS: "USER_PROGRESS";
+    readonly USER_BLOCKED: "USER_BLOCKED";
+    readonly TASK_ASSIGNMENT: "TASK_ASSIGNMENT";
+    readonly TASK_COMPLETED: "TASK_COMPLETED";
+    readonly TASK_BLOCKED: "TASK_BLOCKED";
+    readonly TASK_REASSIGNED: "TASK_REASSIGNED";
+    readonly ROADMAP_CREATED: "ROADMAP_CREATED";
+    readonly ROADMAP_UPDATED: "ROADMAP_UPDATED";
+    readonly ROADMAP_UPDATE_REQUEST: "ROADMAP_UPDATE";
+    readonly SCANNER_ALLOCATION: "SCANNER_ALLOCATION";
+    readonly TARGETED_SCAN: "TARGETED_SCAN";
+    readonly SCAN_RESULT: "SCAN_RESULT";
+    readonly SCAN_INSIGHTS: "SCAN_INSIGHTS";
+    readonly REPOSITORY_ANALYSIS: "REPOSITORY_ANALYSIS";
+    readonly SCAN_SUMMARY: "SCAN_SUMMARY";
+    readonly USER_COMMUNICATION: "USER_COMMUNICATION";
+    readonly ASSISTANCE_NEEDED: "ASSISTANCE_NEEDED";
+    readonly COLLABORATION_REQUEST: "COLLABORATION_REQUEST";
+    readonly COORDINATION_UPDATE: "COORDINATION_UPDATE";
+    readonly PROGRESS_MAP_UPDATE: "PROGRESS_MAP_UPDATE";
+    readonly CONFLICTS_DETECTED: "CONFLICTS_DETECTED";
+    readonly STRATEGIC_SUMMARY: "STRATEGIC_SUMMARY";
+    readonly STRATEGIC_GUIDANCE_REQUEST: "STRATEGIC_GUIDANCE_REQUEST";
+    readonly DECISION_NOTIFICATION: "DECISION_NOTIFICATION";
+    readonly CODE_EXTRACTION_REQUEST: "CODE_EXTRACTION_REQUEST";
+    readonly CODE_EXTRACTED: "CODE_EXTRACTED";
+    readonly EDIT_RECOMMENDATIONS: "EDIT_RECOMMENDATIONS";
+    readonly HEALTH_CHECK: "HEALTH_CHECK";
+    readonly ERROR_OCCURRED: "ERROR_OCCURRED";
+    readonly ALERT_TRIGGERED: "ALERT_TRIGGERED";
+};
+export declare const SCANNER_MODES: {
+    readonly MINIMAL: "minimal";
+    readonly TARGETED: "targeted";
+    readonly COMPREHENSIVE: "comprehensive";
+    readonly DEEP_DIVE: "deep_dive";
+    readonly CONTINUOUS: "continuous";
+};
+export declare const TASK_STATUS: {
+    readonly NOT_STARTED: "not_started";
+    readonly IN_PROGRESS: "in_progress";
+    readonly BLOCKED: "blocked";
+    readonly COMPLETED: "completed";
+};
+export declare const PRIORITY_LEVELS: {
+    readonly CRITICAL: 1;
+    readonly HIGH: 2;
+    readonly MEDIUM: 3;
+    readonly LOW: 4;
+};
+export declare const TOKEN_LIMITS: {
+    readonly GEMINI_25_PRO: 128000;
+    readonly GEMINI_15_PRO: 128000;
+    readonly GEMINI_25_FLASH: 32000;
+    readonly CLAUDE_4: 100000;
+    readonly CLAUDE_3: 100000;
+    readonly O4_MINI: 128000;
+    readonly GPT_5_NANO: 16000;
+    readonly GPT_5_MINI: 32000;
+    readonly GPT_5: 128000;
+};
+export declare const ERROR_CODES: {
+    readonly AGENT_NOT_FOUND: "AGENT_NOT_FOUND";
+    readonly MESSAGE_ROUTING_FAILED: "MESSAGE_ROUTING_FAILED";
+    readonly TOKEN_LIMIT_EXCEEDED: "TOKEN_LIMIT_EXCEEDED";
+    readonly BUDGET_EXCEEDED: "BUDGET_EXCEEDED";
+    readonly HEALTH_CHECK_FAILED: "HEALTH_CHECK_FAILED";
+    readonly INITIALIZATION_FAILED: "INITIALIZATION_FAILED";
+    readonly VALIDATION_FAILED: "VALIDATION_FAILED";
+};

@@ -1,0 +1,31 @@
+import { Firestore } from '@google-cloud/firestore';
+import { MessageRouter } from '../core/messageRouter';
+import { Logger } from '../utils/logger';
+export declare class UserCompiler {
+    private userId;
+    private db;
+    private messageRouter;
+    private logger;
+    private gemini;
+    private model;
+    private userContext;
+    private assignedTasks;
+    constructor(userId: string, db: Firestore, messageRouter: MessageRouter, logger: Logger);
+    private initialize;
+    private setupMessageHandlers;
+    private loadUserContext;
+    private startUserMonitoring;
+    private handleTaskAssignment;
+    private generateTaskGuidance;
+    private processRepositoryInsights;
+    private isRelevantToUser;
+    private contextualizeInsights;
+    private assessImpact;
+    private checkUserProgress;
+    private getTaskProgress;
+    private generateUserInsights;
+    private reportToProgressCoordinator;
+    private suggestAssistance;
+    private notifyUser;
+    private handleRoadmapUpdate;
+}
