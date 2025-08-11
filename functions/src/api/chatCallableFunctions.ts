@@ -126,7 +126,9 @@ export const createProject = functions.https.onCall(async (data, context) => {
             githubRepo: githubRepo || null,
             createdAt: Date.now(),
             updatedAt: Date.now(),
-            status: 'active'
+            status: 'open', // Set status to open so it appears in project list
+            participantCount: 1, // Creator is the first participant
+            maxParticipants: 8 // Default max participants
         });
 
         console.log('Project created:', projectId);
